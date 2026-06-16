@@ -156,6 +156,9 @@ Two specific traps hit in this project:
 - CSS had `.day-pill.on` for the active/selected state; JS used `.day-pill.active`. Pills never turned accent-coloured.
 Fix: grep the CSS for the exact selector before writing `element.className = ...` in JS.
 
+**`capture: true` on delegated click handlers fires before lower listeners — use it for priority/date intercepts.**
+When adding a second delegated click handler on the same element (`taskList`), the new one must use `addEventListener('click', fn, true)` (capture phase) or it may not fire if a child's handler calls `stopPropagation`. Safer than restructuring all existing event delegation.
+
 **Use `div` not `span` for stacked text inside a flex column.**
 `span` is `display: inline` by default, so `margin-top` has no effect and two sibling spans run together on one line.
 Using `div` (or adding `display: block` in CSS) is needed when you want the title and subtitle to stack vertically inside a flex container.

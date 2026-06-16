@@ -1,4 +1,4 @@
-const CACHE = 'doit-v15';
+const CACHE = 'doit-v16';
 const ASSETS = [
   './',
   './index.html',
