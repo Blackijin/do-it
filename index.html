@@ -564,6 +564,125 @@
 
     .task-delete:active { transform: scale(.85); }
 
+    /* ─── Timer button & countdown ──────────────────────────── */
+    .timer-btn {
+      opacity: 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px 5px;
+      border-radius: 6px;
+      color: var(--text-secondary);
+      line-height: 1;
+      transition: opacity .15s, color .15s, background .15s;
+      flex-shrink: 0;
+    }
+    .task-item:hover .timer-btn,
+    .task-item:focus-within .timer-btn { opacity: .65; }
+    .timer-btn.active  { opacity: 1 !important; color: var(--accent); }
+    .timer-btn.burning { color: #ef4444 !important; opacity: 1 !important; }
+    .timer-btn:hover   { color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+
+    .timer-countdown {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: .03em;
+      flex-shrink: 0;
+      transition: color .3s;
+    }
+    .timer-countdown.burning { color: #ef4444; animation: pulse .9s ease infinite; }
+    .timer-countdown.expired { color: #ef4444; }
+
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    /* ─── Timer bottom sheet ─────────────────────────────────── */
+    .timer-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.4);
+      opacity: 0; pointer-events: none;
+      transition: opacity .25s; z-index: 199;
+    }
+    .timer-backdrop.open { opacity: 1; pointer-events: auto; }
+
+    .timer-sheet {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: var(--bg-card);
+      border-top: 1.5px solid var(--border);
+      border-radius: 18px 18px 0 0;
+      padding: 8px 20px 36px;
+      transform: translateY(100%);
+      transition: transform .3s cubic-bezier(.4,0,.2,1);
+      z-index: 200;
+    }
+    .timer-sheet.open { transform: translateY(0); }
+
+    .timer-sheet-handle {
+      width: 36px; height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 12px auto 18px;
+    }
+    .timer-sheet h3 {
+      margin: 0 0 14px;
+      font-size: 11px; font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase; letter-spacing: .08em;
+    }
+    .timer-presets {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;
+    }
+    .timer-preset {
+      padding: 8px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      background: none; cursor: pointer;
+      font-size: 14px; font-weight: 600;
+      color: var(--text-primary);
+      transition: background .15s, border-color .15s, color .15s;
+    }
+    .timer-preset:hover { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+
+    .timer-custom {
+      display: flex; gap: 8px; align-items: center; margin-bottom: 14px;
+    }
+    .timer-custom input {
+      width: 72px; padding: 8px 10px;
+      border: 1.5px solid var(--border); border-radius: 8px;
+      background: var(--bg-input); color: var(--text-primary);
+      font-size: 15px; font-weight: 700; text-align: center;
+    }
+    .timer-custom label { font-size: 14px; color: var(--text-secondary); flex: 1; }
+    .timer-set-btn {
+      padding: 9px 20px;
+      background: var(--accent); color: var(--accent-text);
+      border: none; border-radius: 8px;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+    }
+    .timer-clear-btn {
+      width: 100%; padding: 11px;
+      background: none; border: 1.5px solid var(--border);
+      border-radius: 10px; color: #ef4444;
+      font-size: 14px; font-weight: 600; cursor: pointer;
+    }
+
+    /* ─── Timer toast ────────────────────────────────────────── */
+    .timer-toast {
+      position: fixed; bottom: 28px; left: 50%;
+      transform: translateX(-50%) translateY(90px);
+      background: var(--bg-card);
+      border: 2px solid var(--accent);
+      border-radius: 14px; padding: 13px 20px;
+      font-size: 14px; font-weight: 600; color: var(--text-primary);
+      box-shadow: 0 8px 32px rgba(0,0,0,.18);
+      z-index: 300; opacity: 0;
+      transition: transform .35s cubic-bezier(.2,.8,.4,1), opacity .35s;
+      white-space: nowrap; max-width: 90vw;
+      overflow: hidden; text-overflow: ellipsis;
+    }
+    .timer-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
     /* ─── Progress bar shimmer ───────────────────────────────── */
     .progress-bar-fill {
       position: relative;
@@ -1140,6 +1259,16 @@
       });
     }
 
+    function formatCountdown(ms) {
+      if (ms <= 0) return 'Time\'s up!';
+      const s = Math.ceil(ms / 1000);
+      if (s < 60) return `${s}s`;
+      const m = Math.floor(s / 60), rs = s % 60;
+      if (m < 60) return rs === 0 ? `${m}m` : `${m}m ${rs}s`;
+      const h = Math.floor(m / 60), rm = m % 60;
+      return rm === 0 ? `${h}h` : `${h}h ${rm}m`;
+    }
+
     // ─── Render ──────────────────────────────────────────────────
     function render() {
       updateTheme();
@@ -1241,8 +1370,30 @@
       del.title = 'Delete';
       del.innerHTML = '&times;';
 
+      // Timer button
+      const tmrBtn = document.createElement('button');
+      tmrBtn.className = 'timer-btn' + (task.timerEnd ? ' active' : '');
+      tmrBtn.setAttribute('aria-label', 'Set timer');
+      tmrBtn.title = 'Set timer';
+      tmrBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5V8l2.5 2"/></svg>`;
+
+      // Timer countdown (only shown when timer is active)
+      const tmrDisplay = document.createElement('span');
+      tmrDisplay.className = 'timer-countdown';
+      tmrDisplay.dataset.id = task.id;
+      if (task.timerEnd) {
+        const rem = task.timerEnd - Date.now();
+        tmrDisplay.textContent = formatCountdown(rem);
+        if (rem > 0 && rem < 60_000) tmrDisplay.classList.add('burning');
+        if (rem <= 0) tmrDisplay.classList.add('expired');
+      } else {
+        tmrDisplay.hidden = true;
+      }
+
       li.appendChild(chk);
       li.appendChild(txt);
+      li.appendChild(tmrDisplay);
+      li.appendChild(tmrBtn);
       li.appendChild(del);
       return li;
     }
@@ -1302,6 +1453,111 @@
       }
     }
 
+    // ─── Timer ───────────────────────────────────────────────────
+    let timerTargetId = null;
+
+    const timerBackdrop = document.getElementById('timerBackdrop');
+    const timerSheet    = document.getElementById('timerSheet');
+    const timerClearBtn = document.getElementById('timerClearBtn');
+    const timerSetBtn   = document.getElementById('timerSetBtn');
+    const timerCustomInput = document.getElementById('timerCustomInput');
+    const timerToast    = document.getElementById('timerToast');
+
+    function openTimerSheet(id) {
+      timerTargetId = id;
+      const task = state.tasks.find(t => t.id === id);
+      timerClearBtn.hidden = !(task && task.timerEnd);
+      timerCustomInput.value = '';
+      timerBackdrop.classList.add('open');
+      timerSheet.classList.add('open');
+    }
+
+    function closeTimerSheet() {
+      timerBackdrop.classList.remove('open');
+      timerSheet.classList.remove('open');
+      timerTargetId = null;
+    }
+
+    function applyTimer(minutes) {
+      const id = timerTargetId;
+      if (!id) return;
+      const task = state.tasks.find(t => t.id === id);
+      if (!task) return;
+      task.timerEnd = Date.now() + minutes * 60_000;
+      saveState();
+      render();
+      closeTimerSheet();
+      // Request notification permission if needed
+      if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+    }
+
+    function clearTimer(id) {
+      const task = state.tasks.find(t => t.id === id);
+      if (!task) return;
+      delete task.timerEnd;
+      saveState();
+      render();
+    }
+
+    let toastTimeout = null;
+    function showTimerToast(text) {
+      timerToast.textContent = text;
+      timerToast.classList.add('show');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => timerToast.classList.remove('show'), 4000);
+    }
+
+    function tickTimers() {
+      const now = Date.now();
+      let changed = false;
+      state.tasks.forEach(task => {
+        if (!task.timerEnd) return;
+        const rem = task.timerEnd - now;
+        // Update live countdown labels in DOM without full re-render
+        const span = taskList.querySelector(`.timer-countdown[data-id="${task.id}"]`);
+        if (span) {
+          span.hidden = false;
+          span.textContent = formatCountdown(rem);
+          span.classList.toggle('burning', rem > 0 && rem < 60_000);
+          span.classList.toggle('expired', rem <= 0);
+        }
+        // Fire notification once when timer crosses zero
+        if (rem <= 0 && !task.timerFired) {
+          task.timerFired = true;
+          changed = true;
+          showTimerToast(`⏰ Time's up! — "${task.text}"`);
+          if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('Do It — Timer done', {
+              body: task.text,
+              icon: './icon2.svg'
+            });
+          }
+          playSound('complete');
+        }
+      });
+      if (changed) saveState();
+    }
+
+    // Timer sheet events
+    timerBackdrop.addEventListener('click', closeTimerSheet);
+    timerClearBtn.addEventListener('click', () => {
+      clearTimer(timerTargetId);
+      closeTimerSheet();
+    });
+    timerSetBtn.addEventListener('click', () => {
+      const mins = parseInt(timerCustomInput.value, 10);
+      if (!mins || mins < 1) return;
+      applyTimer(mins);
+    });
+    timerCustomInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') timerSetBtn.click();
+    });
+    document.querySelectorAll('.timer-preset').forEach(btn => {
+      btn.addEventListener('click', () => applyTimer(Number(btn.dataset.mins)));
+    });
+
     // ─── Mutations ───────────────────────────────────────────────
     function addTask() {
       const text = taskInput.value.trim();
@@ -1326,6 +1582,8 @@
       const checking = !task.done;
       task.done = checking;
       if (checking) {
+        delete task.timerEnd;
+        delete task.timerFired;
         state.archive = state.archive.filter(a => a.id !== id);
         state.archive.unshift({ id, text: task.text, completedAt: Date.now() });
       } else {
@@ -1561,6 +1819,8 @@
         toggleTask(id);
       } else if (e.target.closest('.task-delete')) {
         deleteTask(id);
+      } else if (e.target.closest('.timer-btn')) {
+        openTimerSheet(id);
       }
     });
 
@@ -1632,6 +1892,7 @@
       loadState();
       render();
       setInterval(updateHeader, 60_000);
+      setInterval(tickTimers, 1000);
     });
 
     // ─── PWA: Service Worker ─────────────────────────────────────
@@ -1666,5 +1927,28 @@
       installBtn.hidden = true;
     });
   </script>
+
+  <!-- Timer bottom sheet -->
+  <div class="timer-backdrop" id="timerBackdrop"></div>
+  <div class="timer-sheet" id="timerSheet" aria-modal="true" role="dialog">
+    <div class="timer-sheet-handle"></div>
+    <h3>Set timer</h3>
+    <div class="timer-presets">
+      <button class="timer-preset" data-mins="5">5 min</button>
+      <button class="timer-preset" data-mins="10">10 min</button>
+      <button class="timer-preset" data-mins="15">15 min</button>
+      <button class="timer-preset" data-mins="30">30 min</button>
+      <button class="timer-preset" data-mins="60">1 hour</button>
+    </div>
+    <div class="timer-custom">
+      <input type="number" id="timerCustomInput" min="1" max="999" placeholder="—">
+      <label for="timerCustomInput">minutes</label>
+      <button class="timer-set-btn" id="timerSetBtn">Set</button>
+    </div>
+    <button class="timer-clear-btn" id="timerClearBtn" hidden>Remove timer</button>
+  </div>
+
+  <!-- Timer fired toast -->
+  <div class="timer-toast" id="timerToast"></div>
 </body>
 </html>
