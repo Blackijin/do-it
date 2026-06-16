@@ -1,4 +1,4 @@
-const CACHE = 'doit-v3';
+const CACHE = 'doit-v4';
 const ASSETS = [
   './',
   './index.html',

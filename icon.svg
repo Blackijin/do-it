@@ -1,4 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <rect width="512" height="512" rx="115" fill="#4f46e5"/>
-  <path d="M144 262 L228 346 L368 190" stroke="white" stroke-width="54" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="190" y="275"
+        font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif"
+        font-weight="900" font-size="340" fill="white"
+        text-anchor="middle" dominant-baseline="middle">D</text>
+  <text x="385" y="275"
+        font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif"
+        font-weight="900" font-size="340" fill="white" fill-opacity="0.42"
+        text-anchor="middle" dominant-baseline="middle">!</text>
+  <text x="256" y="450"
+        font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif"
+        font-weight="600" font-size="70" fill="white" fill-opacity="0.55"
+        text-anchor="middle" dominant-baseline="middle" letter-spacing="8">DO IT</text>
 </svg>
