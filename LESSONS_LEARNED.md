@@ -42,6 +42,13 @@ Without this, `ctx.resume()` on the first real interaction may still fail on som
 
 ## Service Worker & Caching
 
+**After a deploy, users may still see the old version — the SW is serving from cache.**
+Bumping the cache version causes the new SW to activate and purge the old cache, but the
+browser only checks for a new SW in the background. Until it does, the old files are served.
+Fix for the user: DevTools → Application → Service Workers → Update → Skip Waiting → hard refresh.
+Or: clear site data for the origin in browser settings. On Android, clear cached files in
+Chrome Settings → Privacy → Clear browsing data.
+
 **Bump the `CACHE` constant in `sw.js` on every deploy, not just major changes.**
 The SW uses cache-first — users never see new files unless the SW itself changes.
 Always increment (e.g. `doit-v1` → `doit-v2`) and always push `sw.js` alongside
