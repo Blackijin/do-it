@@ -1,0 +1,6 @@
+cert.pem
+key.pem
+cert.pfx
+__pycache__/
+*.pyc
+.claude/

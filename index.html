@@ -1,0 +1,1670 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Do It — Daily To-Do</title>
+
+  <!-- PWA manifest & icons -->
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <meta name="theme-color" content="#4f46e5" id="themeColorMeta" />
+
+  <!-- Installable on Android / iOS -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Do It" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
+  <!-- No external fonts — system fonts work great offline on all platforms -->
+  <style>
+    /* ─── Reset ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    ul { list-style: none; }
+    button { cursor: pointer; font: inherit; }
+    input  { font: inherit; }
+
+    /* ─── CSS Tokens — Light theme (default) ──────────────── */
+    :root {
+      --bg-page:        #f0f0f5;
+      --bg-card:        #ffffff;
+      --bg-input:       #ffffff;
+      --bg-header:      #ffffff;
+
+      --text-primary:   #1a1a2e;
+      --text-secondary: #555577;
+      --text-muted:     #aaaacc;
+
+      --accent:         #4f46e5;
+      --accent-hover:   #4338ca;
+      --accent-soft:    rgba(79, 70, 229, 0.10);
+      --accent-text:    #ffffff;
+
+      --task-done-text: #aaaacc;
+      --task-done-bg:   transparent;
+
+      --border:         #e2e2f0;
+      --border-focus:   #4f46e5;
+      --shadow-sm:      0 1px 3px rgba(0,0,0,.07);
+      --shadow-md:      0 4px 16px rgba(0,0,0,.09);
+
+      --swatch-color:   #4f46e5;
+      --radius:         14px;
+      --radius-sm:      8px;
+
+      --transition:     .2s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* ─── Dark ───────────────────────────────────────────────── */
+    :root[data-theme="dark"] {
+      --bg-page:        #0d0d14;
+      --bg-card:        #1a1a2a;
+      --bg-input:       #1e1e30;
+      --bg-header:      #1a1a2a;
+      --text-primary:   #eeeeff;
+      --text-secondary: #9999cc;
+      --text-muted:     #555577;
+      --accent:         #818cf8;
+      --accent-hover:   #a5b4fc;
+      --accent-soft:    rgba(129,140,248,.12);
+      --accent-text:    #0d0d14;
+      --task-done-text: #555577;
+      --border:         #2a2a40;
+      --border-focus:   #818cf8;
+      --shadow-sm:      0 1px 3px rgba(0,0,0,.3);
+      --shadow-md:      0 4px 20px rgba(0,0,0,.4);
+      --swatch-color:   #818cf8;
+    }
+
+    /* ─── Ocean ──────────────────────────────────────────────── */
+    :root[data-theme="ocean"] {
+      --bg-page:        #e0f2fe;
+      --bg-card:        #f0f9ff;
+      --bg-input:       #ffffff;
+      --bg-header:      #f0f9ff;
+      --text-primary:   #0c4a6e;
+      --text-secondary: #0369a1;
+      --text-muted:     #7dd3fc;
+      --accent:         #0284c7;
+      --accent-hover:   #0369a1;
+      --accent-soft:    rgba(2,132,199,.10);
+      --accent-text:    #ffffff;
+      --task-done-text: #7dd3fc;
+      --border:         #bae6fd;
+      --border-focus:   #0284c7;
+      --shadow-sm:      0 1px 3px rgba(2,132,199,.08);
+      --shadow-md:      0 4px 16px rgba(2,132,199,.12);
+      --swatch-color:   #0284c7;
+    }
+
+    /* ─── Sunset ─────────────────────────────────────────────── */
+    :root[data-theme="sunset"] {
+      --bg-page:        #fff7ed;
+      --bg-card:        #fffbf5;
+      --bg-input:       #ffffff;
+      --bg-header:      #fffbf5;
+      --text-primary:   #431407;
+      --text-secondary: #9a3412;
+      --text-muted:     #fdba74;
+      --accent:         #ea580c;
+      --accent-hover:   #c2410c;
+      --accent-soft:    rgba(234,88,12,.10);
+      --accent-text:    #ffffff;
+      --task-done-text: #fdba74;
+      --border:         #fed7aa;
+      --border-focus:   #ea580c;
+      --shadow-sm:      0 1px 3px rgba(234,88,12,.07);
+      --shadow-md:      0 4px 16px rgba(234,88,12,.10);
+      --swatch-color:   #ea580c;
+    }
+
+    /* ─── Forest ─────────────────────────────────────────────── */
+    :root[data-theme="forest"] {
+      --bg-page:        #f0fdf4;
+      --bg-card:        #f7fef9;
+      --bg-input:       #ffffff;
+      --bg-header:      #f7fef9;
+      --text-primary:   #14532d;
+      --text-secondary: #166534;
+      --text-muted:     #86efac;
+      --accent:         #16a34a;
+      --accent-hover:   #15803d;
+      --accent-soft:    rgba(22,163,74,.10);
+      --accent-text:    #ffffff;
+      --task-done-text: #86efac;
+      --border:         #bbf7d0;
+      --border-focus:   #16a34a;
+      --shadow-sm:      0 1px 3px rgba(22,163,74,.07);
+      --shadow-md:      0 4px 16px rgba(22,163,74,.10);
+      --swatch-color:   #16a34a;
+    }
+
+    /* ─── Lavender ───────────────────────────────────────────── */
+    :root[data-theme="lavender"] {
+      --bg-page:        #faf5ff;
+      --bg-card:        #fdf8ff;
+      --bg-input:       #ffffff;
+      --bg-header:      #fdf8ff;
+      --text-primary:   #3b0764;
+      --text-secondary: #6b21a8;
+      --text-muted:     #d8b4fe;
+      --accent:         #9333ea;
+      --accent-hover:   #7e22ce;
+      --accent-soft:    rgba(147,51,234,.10);
+      --accent-text:    #ffffff;
+      --task-done-text: #d8b4fe;
+      --border:         #e9d5ff;
+      --border-focus:   #9333ea;
+      --shadow-sm:      0 1px 3px rgba(147,51,234,.07);
+      --shadow-md:      0 4px 16px rgba(147,51,234,.10);
+      --swatch-color:   #9333ea;
+    }
+
+    /* ─── Base styles ────────────────────────────────────────── */
+    body {
+      background: var(--bg-page);
+      color: var(--text-primary);
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+      transition: background var(--transition), color var(--transition);
+    }
+
+    .app-wrapper {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* ─── Header ─────────────────────────────────────────────── */
+    .app-header {
+      background: var(--bg-header);
+      border-radius: var(--radius);
+      padding: 1.75rem 1.75rem 1.5rem;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 1rem;
+      border: 1px solid var(--border);
+      transition: background var(--transition), border-color var(--transition), box-shadow var(--transition);
+    }
+
+    .header-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .app-title {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+      line-height: 1.1;
+    }
+
+    .app-title span {
+      color: var(--accent);
+    }
+
+    .tally-badge {
+      background: var(--accent-soft);
+      border: 1.5px solid var(--accent);
+      color: var(--accent);
+      border-radius: 999px;
+      padding: .35rem .9rem;
+      font-size: .8rem;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: background var(--transition), border-color var(--transition), color var(--transition);
+      flex-shrink: 0;
+    }
+
+    .tally-numbers {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+      margin-top: .6rem;
+    }
+
+    .tally-numbers span {
+      color: var(--text-muted);
+      font-weight: 400;
+      font-size: 1rem;
+    }
+
+    .app-date {
+      font-size: .82rem;
+      color: var(--text-secondary);
+      margin-top: .3rem;
+      font-weight: 500;
+    }
+
+    /* ─── Progress bar ───────────────────────────────────────── */
+    .progress-bar-track {
+      height: 5px;
+      background: var(--border);
+      border-radius: 999px;
+      margin-top: 1rem;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 999px;
+      transition: width .4s cubic-bezier(.4,0,.2,1), background var(--transition);
+      width: 0%;
+    }
+
+    /* ─── Theme picker ───────────────────────────────────────── */
+    .theme-section {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: .9rem 1.25rem;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      transition: background var(--transition), border-color var(--transition);
+    }
+
+    .theme-label {
+      font-size: .75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+
+    .theme-swatches {
+      display: flex;
+      gap: .5rem;
+      flex-wrap: wrap;
+    }
+
+    .swatch {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--swatch-color);
+      cursor: pointer;
+      border: 2.5px solid transparent;
+      outline: 2.5px solid transparent;
+      outline-offset: 2px;
+      transition: transform var(--transition), outline-color var(--transition), border-color var(--transition);
+      position: relative;
+    }
+
+    .swatch:hover { transform: scale(1.18); }
+
+    .swatch.active {
+      outline-color: var(--accent);
+      border-color: white;
+    }
+
+    /* Each swatch shows its own theme color */
+    .swatch[data-theme="light"]    { --swatch-color: #4f46e5; }
+    .swatch[data-theme="dark"]     { --swatch-color: #818cf8; background: #818cf8; border-color: #1a1a2a; }
+    .swatch[data-theme="ocean"]    { --swatch-color: #0284c7; background: #0284c7; }
+    .swatch[data-theme="sunset"]   { --swatch-color: #ea580c; background: #ea580c; }
+    .swatch[data-theme="forest"]   { --swatch-color: #16a34a; background: #16a34a; }
+    .swatch[data-theme="lavender"] { --swatch-color: #9333ea; background: #9333ea; }
+
+    .swatch-tooltip {
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--text-primary);
+      color: var(--bg-card);
+      font-size: .68rem;
+      font-weight: 600;
+      padding: .25rem .5rem;
+      border-radius: 5px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .15s;
+    }
+
+    .swatch:hover .swatch-tooltip { opacity: 1; }
+
+    /* ─── Add Task ───────────────────────────────────────────── */
+    .add-task-section {
+      display: flex;
+      gap: .6rem;
+      margin-bottom: 1rem;
+    }
+
+    .task-input {
+      flex: 1;
+      background: var(--bg-input);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: .75rem 1rem;
+      color: var(--text-primary);
+      font-size: .95rem;
+      outline: none;
+      box-shadow: var(--shadow-sm);
+      transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+    }
+
+    .task-input::placeholder { color: var(--text-muted); }
+
+    .task-input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px var(--accent-soft), var(--shadow-sm);
+    }
+
+    .task-input.shake { animation: shake .35s ease; }
+
+    .add-btn {
+      background: var(--accent);
+      color: var(--accent-text);
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: .75rem 1.25rem;
+      font-size: .9rem;
+      font-weight: 600;
+      box-shadow: var(--shadow-sm);
+      transition: background .2s, transform .12s cubic-bezier(.15,.8,.3,1), box-shadow .2s;
+      white-space: nowrap;
+    }
+
+    .add-btn:hover {
+      background: var(--accent-hover);
+      box-shadow: var(--shadow-md);
+    }
+
+    .add-btn:active { transform: scale(.91); }
+
+    /* ─── Task list ──────────────────────────────────────────── */
+    .task-list-card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      transition: background var(--transition), border-color var(--transition);
+    }
+
+    .task-list { padding: .4rem 0; }
+
+    /* ─── Keyframes ──────────────────────────────────────────── */
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%      { transform: translateX(-6px); }
+      40%      { transform: translateX(6px); }
+      60%      { transform: translateX(-4px); }
+      80%      { transform: translateX(4px); }
+    }
+
+    @keyframes taskEnter {
+      from { opacity: 0; transform: translateY(-10px) scale(.97); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    @keyframes taskExit {
+      0%   { opacity: 1; transform: translateX(0);    max-height: 80px; padding: .7rem 1rem; }
+      100% { opacity: 0; transform: translateX(24px); max-height: 0;    padding: 0   1rem; }
+    }
+
+    @keyframes checkPop {
+      0%   { transform: scale(1); }
+      38%  { transform: scale(1.38); }
+      72%  { transform: scale(.92); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes calDayPop {
+      0%   { transform: scale(.82); }
+      55%  { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes paneSlideIn {
+      from { opacity: 0; transform: translateY(-7px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    @keyframes shimmer {
+      from { left: -60%; }
+      to   { left: 120%; }
+    }
+
+    @keyframes tallyPop {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.07); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes swatchPop {
+      0%   { transform: scale(1); }
+      45%  { transform: scale(1.45); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    /* ─── Task item ──────────────────────────────────────────── */
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      padding: .7rem 1rem;
+      border-bottom: 1px solid var(--border);
+      animation: taskEnter .22s cubic-bezier(.2,.8,.4,1);
+      transition: background var(--transition);
+      position: relative;
+    }
+
+    .task-item:last-child { border-bottom: none; }
+    .task-item:hover { background: var(--accent-soft); }
+
+    .task-item.removing {
+      animation: taskExit .22s ease forwards;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    /* ─── Circular checkbox ──────────────────────────────────── */
+    .task-checkbox {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: border-color .18s, background .18s, box-shadow .18s;
+      position: relative;
+    }
+
+    .task-checkbox:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px var(--accent-soft);
+    }
+
+    .task-checkbox:active { transform: scale(.82); }
+
+    .task-checkbox.checked {
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+
+    .task-checkbox.pop { animation: checkPop .3s cubic-bezier(.2,.8,.4,1); }
+
+    /* CSS checkmark draws in */
+    .task-checkbox::after {
+      content: '';
+      width: 5px;
+      height: 9px;
+      border: 2px solid transparent;
+      border-top: none;
+      border-left: none;
+      transform: rotate(45deg) translateY(-1px);
+      opacity: 0;
+      transition: opacity .18s, border-color .18s;
+    }
+
+    .task-checkbox.checked::after {
+      border-color: var(--accent-text);
+      opacity: 1;
+    }
+
+    /* ─── Task text ──────────────────────────────────────────── */
+    .task-text {
+      flex: 1;
+      font-size: .95rem;
+      color: var(--text-primary);
+      word-break: break-word;
+      text-decoration: line-through transparent;
+      transition: color .35s, text-decoration-color .35s, opacity .35s;
+    }
+
+    .task-item.done .task-text {
+      color: var(--task-done-text);
+      text-decoration-color: var(--task-done-text);
+      opacity: .6;
+    }
+
+    /* ─── Delete button ──────────────────────────────────────── */
+    .task-delete {
+      opacity: 0;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      line-height: 1;
+      padding: .25rem;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      width: 26px;
+      height: 26px;
+      flex-shrink: 0;
+      transform: scale(.7);
+      transition: opacity .15s, color .15s, background .15s, transform .15s cubic-bezier(.2,.8,.4,1);
+    }
+
+    .task-item:hover .task-delete,
+    .task-item:focus-within .task-delete { opacity: 1; transform: scale(1); }
+
+    .task-delete:hover {
+      color: #ef4444;
+      background: rgba(239,68,68,.10);
+    }
+
+    .task-delete:active { transform: scale(.85); }
+
+    /* ─── Progress bar shimmer ───────────────────────────────── */
+    .progress-bar-fill {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      left: -60%;
+      width: 40%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.28), transparent);
+      animation: shimmer 2.5s ease-in-out infinite;
+    }
+
+    /* ─── Tally pulse ────────────────────────────────────────── */
+    .tally-numbers.pulse { animation: tallyPop .25s ease; }
+
+    /* ─── Empty state ────────────────────────────────────────── */
+    .empty-state { animation: fadeInUp .3s ease; }
+    .empty-state {
+      padding: 3rem 1.5rem;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    .empty-state svg {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 1rem;
+      opacity: .5;
+    }
+
+    .empty-state p {
+      font-size: .9rem;
+      font-weight: 500;
+    }
+
+    .empty-state p.hint {
+      font-size: .78rem;
+      margin-top: .35rem;
+      opacity: .7;
+    }
+
+    /* ─── Section label ──────────────────────────────────────── */
+    .list-label {
+      padding: .5rem 1rem .25rem;
+      font-size: .7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--text-muted);
+    }
+
+    /* ─── Install button ────────────────────────────────────── */
+    .install-btn {
+      display: none;          /* shown via JS when browser fires beforeinstallprompt */
+      align-items: center;
+      gap: .35rem;
+      margin-left: auto;
+      background: var(--accent);
+      color: var(--accent-text);
+      border: none;
+      border-radius: 999px;
+      padding: .35rem .85rem;
+      font-size: .72rem;
+      font-weight: 700;
+      white-space: nowrap;
+      transition: background var(--transition), transform .12s cubic-bezier(.15,.8,.3,1);
+    }
+
+    .install-btn.visible { display: flex; }
+    .install-btn:hover    { background: var(--accent-hover); }
+    .install-btn:active   { transform: scale(.92); }
+
+    .install-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
+
+    /* ─── Archive toggle button ──────────────────────────────── */
+    .archive-toggle-btn {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      margin: .75rem auto 0;
+      background: none;
+      border: 1.5px solid var(--border);
+      border-radius: 999px;
+      padding: .45rem 1.1rem;
+      font-size: .8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      transition: border-color var(--transition), color var(--transition), background var(--transition);
+    }
+
+    .archive-toggle-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .archive-toggle-btn svg {
+      width: 14px; height: 14px;
+      transition: transform var(--transition);
+    }
+
+    .archive-toggle-btn.open svg:last-child { transform: rotate(180deg); }
+
+    .archive-count-pill {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 999px;
+      padding: .1rem .45rem;
+      font-size: .72rem;
+    }
+
+    /* ─── Archive panel (animated accordion) ────────────────── */
+    .archive-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      /* closed state */
+      max-height: 0;
+      opacity: 0;
+      margin-top: 0;
+      pointer-events: none;
+      border-width: 0;
+      transition:
+        max-height .42s cubic-bezier(.4,0,.2,1),
+        opacity .28s ease,
+        margin-top .3s ease,
+        border-width 0s .42s,
+        background var(--transition),
+        border-color var(--transition);
+    }
+
+    .archive-panel.open {
+      max-height: 2400px;
+      opacity: 1;
+      margin-top: .75rem;
+      pointer-events: auto;
+      border-width: 1px;
+      transition:
+        max-height .42s cubic-bezier(.4,0,.2,1),
+        opacity .28s ease,
+        margin-top .3s ease,
+        border-width 0s,
+        background var(--transition),
+        border-color var(--transition);
+    }
+
+    /* ─── Calendar header ────────────────────────────────────── */
+    .cal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .85rem 1rem .75rem;
+      border-bottom: 1px solid var(--border);
+      gap: .5rem;
+    }
+
+    .cal-nav-btn {
+      background: none;
+      border: 1.5px solid var(--border);
+      border-radius: 50%;
+      width: 30px; height: 30px;
+      display: grid; place-items: center;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+      transition: border-color var(--transition), color var(--transition), background var(--transition), transform .12s cubic-bezier(.15,.8,.3,1);
+    }
+
+    .cal-nav-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .cal-nav-btn:active { transform: scale(.84); }
+
+    .cal-nav-btn svg { width: 14px; height: 14px; }
+
+    .cal-month-year {
+      flex: 1;
+      text-align: center;
+      font-size: .95rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .cal-year-select {
+      background: var(--bg-input);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: .8rem;
+      font-weight: 600;
+      padding: .25rem .4rem;
+      outline: none;
+      cursor: pointer;
+      transition: border-color var(--transition);
+    }
+
+    .cal-year-select:focus { border-color: var(--border-focus); }
+
+    /* ─── Calendar grid ──────────────────────────────────────── */
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+      padding: .6rem .75rem .75rem;
+    }
+
+    .cal-dow {
+      text-align: center;
+      font-size: .65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--text-muted);
+      padding: .25rem 0 .4rem;
+    }
+
+    .cal-day {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      font-size: .82rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border: 1.5px solid transparent;
+      transition: background var(--transition), color var(--transition), border-color var(--transition);
+      line-height: 1;
+      gap: 3px;
+    }
+
+    .cal-day:hover {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .cal-day.empty {
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .cal-day.other-month {
+      color: var(--text-muted);
+      opacity: .4;
+      pointer-events: none;
+    }
+
+    .cal-day.is-today {
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .cal-day:active { transform: scale(.82); transition: transform .1s; }
+
+    .cal-day.is-selected {
+      background: var(--accent);
+      color: var(--accent-text);
+      font-weight: 700;
+      animation: calDayPop .22s cubic-bezier(.2,.8,.4,1);
+    }
+
+    .cal-day.is-selected:hover {
+      background: var(--accent-hover);
+      color: var(--accent-text);
+    }
+
+    /* Dot under days that have archived entries */
+    .cal-day.has-entries::after {
+      content: '';
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .cal-day.is-selected.has-entries::after {
+      background: var(--accent-text);
+    }
+
+    /* ─── Day tasks pane ─────────────────────────────────────── */
+    .cal-tasks-pane {
+      border-top: 1px solid var(--border);
+    }
+
+    .cal-tasks-pane.slide-in { animation: paneSlideIn .2s ease; }
+
+    /* ─── Swatch pop on select ───────────────────────────────── */
+    .swatch.pop { animation: swatchPop .25s cubic-bezier(.2,.8,.4,1); }
+
+    .cal-tasks-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .65rem 1rem .5rem;
+    }
+
+    .cal-tasks-date-label {
+      font-size: .75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--text-secondary);
+    }
+
+    .archive-clear-btn {
+      background: none;
+      border: none;
+      font-size: .72rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: .2rem .5rem;
+      border-radius: var(--radius-sm);
+      transition: color var(--transition), background var(--transition);
+    }
+
+    .archive-clear-btn:hover { color: #ef4444; background: rgba(239,68,68,.08); }
+
+    .archive-empty {
+      padding: 1.5rem 1rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: .82rem;
+    }
+
+    /* ─── Archive item ───────────────────────────────────────── */
+    .archive-item {
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+      padding: .55rem 1rem;
+      border-bottom: 1px solid var(--border);
+      transition: background var(--transition);
+    }
+
+    .archive-item:last-child { border-bottom: none; }
+    .archive-item:hover { background: var(--accent-soft); }
+
+    .archive-check-icon {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+      display: grid;
+      place-items: center;
+    }
+
+    .archive-check-icon::after {
+      content: '';
+      width: 4px; height: 7px;
+      border: 1.5px solid var(--accent-text);
+      border-top: none; border-left: none;
+      transform: rotate(45deg) translateY(-1px);
+    }
+
+    .archive-item-text {
+      flex: 1;
+      font-size: .88rem;
+      color: var(--text-secondary);
+      word-break: break-word;
+    }
+
+    .archive-item-time {
+      font-size: .7rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .archive-remove-btn {
+      opacity: 0;
+      background: none;
+      border: none;
+      font-size: .8rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: .2rem .4rem;
+      border-radius: 4px;
+      transition: opacity .15s, color .15s, background .15s;
+      flex-shrink: 0;
+    }
+
+    .archive-item:hover .archive-remove-btn { opacity: 1; }
+    .archive-remove-btn:hover { color: #ef4444; background: rgba(239,68,68,.08); }
+
+    /* ─── Responsive ─────────────────────────────────────────── */
+    @media (max-width: 480px) {
+      body { padding: 1rem .75rem 3rem; }
+      .app-title { font-size: 1.6rem; }
+      .tally-numbers { font-size: 1.25rem; }
+      .add-btn { padding: .75rem .9rem; }
+      .theme-section { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-wrapper">
+
+    <!-- HEADER -->
+    <header class="app-header">
+      <div class="header-top">
+        <div>
+          <h1 class="app-title">Do <span>It.</span></h1>
+          <p class="app-date" id="appDate"></p>
+        </div>
+        <div class="tally-badge" id="tallyBadge">0 completed</div>
+      </div>
+      <div class="tally-numbers" id="tallyNumbers">
+        0 <span>of 0 tasks done</span>
+      </div>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="progressFill"></div>
+      </div>
+    </header>
+
+    <!-- THEME PICKER -->
+    <div class="theme-section">
+      <span class="theme-label">Theme</span>
+      <div class="theme-swatches" id="themePicker">
+        <div class="swatch active" data-theme="light"    title="Default Light">
+          <span class="swatch-tooltip">Light</span>
+        </div>
+        <div class="swatch" data-theme="dark"     title="Dark Mode">
+          <span class="swatch-tooltip">Dark</span>
+        </div>
+        <div class="swatch" data-theme="ocean"    title="Ocean Blue">
+          <span class="swatch-tooltip">Ocean</span>
+        </div>
+        <div class="swatch" data-theme="sunset"   title="Sunset Orange">
+          <span class="swatch-tooltip">Sunset</span>
+        </div>
+        <div class="swatch" data-theme="forest"   title="Forest Green">
+          <span class="swatch-tooltip">Forest</span>
+        </div>
+        <div class="swatch" data-theme="lavender" title="Lavender Purple">
+          <span class="swatch-tooltip">Lavender</span>
+        </div>
+      </div>
+      <button class="install-btn" id="installBtn" aria-label="Install app" hidden>
+        <svg viewBox="0 0 12 12" fill="none"><path d="M6 1v7M3 6l3 3 3-3M1 10h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Install App
+      </button>
+    </div>
+
+    <!-- ADD TASK -->
+    <div class="add-task-section">
+      <input
+        type="text"
+        id="taskInput"
+        class="task-input"
+        placeholder="What do you need to do today?"
+        maxlength="200"
+        aria-label="New task"
+      />
+      <button id="addBtn" class="add-btn" aria-label="Add task">+ Add</button>
+    </div>
+
+    <!-- TASK LIST -->
+    <div class="task-list-card">
+      <ul class="task-list" id="taskList" aria-live="polite" aria-label="Task list"></ul>
+
+      <!-- Empty state -->
+      <div class="empty-state" id="emptyState">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="32" cy="32" r="28" stroke="currentColor" stroke-width="2.5" />
+          <path d="M20 32 L28 40 L44 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <p>All clear — nothing to do!</p>
+        <p class="hint">Add a task above to get started.</p>
+      </div>
+    </div>
+
+    <!-- ARCHIVE TOGGLE BUTTON -->
+    <button class="archive-toggle-btn" id="archiveToggleBtn" aria-expanded="false">
+      <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 5h12M4 8h8M6 11h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      Archive
+      <span class="archive-count-pill" id="archiveCountPill">0</span>
+      <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
+    <!-- ARCHIVE PANEL -->
+    <div class="archive-panel" id="archivePanel">
+      <!-- Calendar navigation header -->
+      <div class="cal-header">
+        <button class="cal-nav-btn" id="calPrevBtn" aria-label="Previous month">
+          <svg viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <span class="cal-month-year" id="calMonthYear"></span>
+        <select class="cal-year-select" id="calYearSelect" aria-label="Select year"></select>
+        <button class="cal-nav-btn" id="calNextBtn" aria-label="Next month">
+          <svg viewBox="0 0 14 14" fill="none"><path d="M5 2l5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <!-- Calendar grid (filled by JS) -->
+      <div class="cal-grid" id="calGrid"></div>
+      <!-- Selected-day task list (filled by JS) -->
+      <div class="cal-tasks-pane" id="calTasksPane" hidden></div>
+    </div>
+
+  </div>
+
+  <script>
+    // ─── State ───────────────────────────────────────────────────
+    const STORAGE_KEY = 'doit-app-v1';
+
+    let state = {
+      tasks: [],
+      archive: [],
+      theme: 'light'
+    };
+
+    // ─── Persistence ─────────────────────────────────────────────
+    function saveState() {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') state = { ...state, ...parsed };
+      } catch (_) {}
+    }
+
+    // ─── DOM refs ────────────────────────────────────────────────
+    const taskInput   = document.getElementById('taskInput');
+    const addBtn      = document.getElementById('addBtn');
+    const taskList    = document.getElementById('taskList');
+    const emptyState  = document.getElementById('emptyState');
+    const appDate     = document.getElementById('appDate');
+    const tallyBadge  = document.getElementById('tallyBadge');
+    const tallyNums   = document.getElementById('tallyNumbers');
+    const progressFill = document.getElementById('progressFill');
+    const themePicker      = document.getElementById('themePicker');
+    const archiveToggleBtn = document.getElementById('archiveToggleBtn');
+    const archivePanel     = document.getElementById('archivePanel');
+    const archiveCountPill = document.getElementById('archiveCountPill');
+    const calGrid          = document.getElementById('calGrid');
+    const calMonthYear     = document.getElementById('calMonthYear');
+    const calYearSelect    = document.getElementById('calYearSelect');
+    const calPrevBtn       = document.getElementById('calPrevBtn');
+    const calNextBtn       = document.getElementById('calNextBtn');
+    const calTasksPane     = document.getElementById('calTasksPane');
+
+    // ─── Calendar view state ─────────────────────────────────────
+    const today = new Date();
+    let calView = { year: today.getFullYear(), month: today.getMonth(), selectedKey: null };
+
+    // ─── Utilities ───────────────────────────────────────────────
+    function uid() {
+      if (crypto.randomUUID) return crypto.randomUUID();
+      return Math.random().toString(36).slice(2) + Date.now().toString(36);
+    }
+
+    function formatDate(d) {
+      return d.toLocaleDateString('en-US', {
+        weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+      });
+    }
+
+    // ─── Render ──────────────────────────────────────────────────
+    function render() {
+      updateTheme();
+      updateHeader();
+      renderTaskList();
+      renderArchive();
+    }
+
+    const THEME_COLORS = {
+      light: '#4f46e5', dark: '#818cf8', ocean: '#0284c7',
+      sunset: '#ea580c', forest: '#16a34a', lavender: '#9333ea'
+    };
+
+    function updateTheme() {
+      document.documentElement.setAttribute('data-theme', state.theme);
+      document.querySelectorAll('.swatch').forEach(s => {
+        s.classList.toggle('active', s.dataset.theme === state.theme);
+      });
+      const meta = document.getElementById('themeColorMeta');
+      if (meta) meta.content = THEME_COLORS[state.theme] || '#4f46e5';
+    }
+
+    function updateHeader() {
+      appDate.textContent = formatDate(new Date());
+
+      const total = state.tasks.length;
+      const done  = state.tasks.filter(t => t.done).length;
+      const pct   = total === 0 ? 0 : Math.round((done / total) * 100);
+
+      tallyBadge.textContent = done === 0 ? 'Get started!' : `${done} completed`;
+
+      const newHTML = total === 0
+        ? `<span style="font-size:.9rem;font-weight:500">Add your first task below</span>`
+        : `${done} <span>of ${total} task${total !== 1 ? 's' : ''} done</span>`;
+
+      if (tallyNums.innerHTML !== newHTML) {
+        tallyNums.innerHTML = newHTML;
+        tallyNums.classList.remove('pulse');
+        void tallyNums.offsetWidth;
+        tallyNums.classList.add('pulse');
+      }
+
+      progressFill.style.width = `${pct}%`;
+    }
+
+    function renderTaskList() {
+      const pending   = state.tasks.filter(t => !t.done);
+      const completed = state.tasks.filter(t => t.done);
+
+      taskList.innerHTML = '';
+
+      if (state.tasks.length === 0) {
+        emptyState.removeAttribute('hidden');
+        return;
+      }
+      emptyState.setAttribute('hidden', '');
+
+      if (pending.length > 0) {
+        if (completed.length > 0) {
+          const lbl = document.createElement('li');
+          lbl.className = 'list-label';
+          lbl.textContent = 'To Do';
+          taskList.appendChild(lbl);
+        }
+        pending.forEach(t => taskList.appendChild(buildTaskEl(t)));
+      }
+
+      if (completed.length > 0) {
+        const lbl = document.createElement('li');
+        lbl.className = 'list-label';
+        lbl.textContent = `Completed (${completed.length})`;
+        taskList.appendChild(lbl);
+        completed.forEach(t => taskList.appendChild(buildTaskEl(t)));
+      }
+    }
+
+    function buildTaskEl(task) {
+      const li = document.createElement('li');
+      li.className = 'task-item' + (task.done ? ' done' : '');
+      li.dataset.id = task.id;
+
+      // Checkbox
+      const chk = document.createElement('div');
+      chk.className = 'task-checkbox' + (task.done ? ' checked' : '');
+      chk.setAttribute('role', 'checkbox');
+      chk.setAttribute('aria-checked', task.done ? 'true' : 'false');
+      chk.setAttribute('tabindex', '0');
+      chk.title = task.done ? 'Mark incomplete' : 'Mark complete';
+
+      // Text
+      const txt = document.createElement('span');
+      txt.className = 'task-text';
+      txt.textContent = task.text;
+
+      // Delete
+      const del = document.createElement('button');
+      del.className = 'task-delete';
+      del.setAttribute('aria-label', 'Delete task');
+      del.title = 'Delete';
+      del.innerHTML = '&times;';
+
+      li.appendChild(chk);
+      li.appendChild(txt);
+      li.appendChild(del);
+      return li;
+    }
+
+    // ─── Sound engine ────────────────────────────────────────────
+    let _actx = null;
+    function actx() {
+      if (!_actx) _actx = new (window.AudioContext || window.webkitAudioContext)();
+      return _actx;
+    }
+
+    // Unlock Web Audio on first touch (required on Android/iOS)
+    document.addEventListener('touchstart', function unlockAudio() {
+      const ctx = actx();
+      const buf = ctx.createBuffer(1, 1, 22050);
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      src.connect(ctx.destination);
+      src.start(0);
+      ctx.resume();
+    }, { once: true });
+
+    function playSound(type) {
+      try {
+        const ctx = actx();
+        const doPlay = () => {
+          const t = ctx.currentTime;
+          const beep = (freq, startT, dur, vol = 0.12, wave = 'sine') => {
+            const o = ctx.createOscillator();
+            const g = ctx.createGain();
+            o.type = wave;
+            o.connect(g); g.connect(ctx.destination);
+            o.frequency.setValueAtTime(freq, startT);
+            g.gain.setValueAtTime(vol, startT);
+            g.gain.exponentialRampToValueAtTime(0.0001, startT + dur);
+            o.start(startT); o.stop(startT + dur);
+          };
+          if (type === 'add') {
+            beep(520, t, 0.08, 0.08);
+            beep(780, t + 0.07, 0.1, 0.06);
+          } else if (type === 'complete') {
+            beep(523, t, 0.15, 0.12);
+            beep(659, t + 0.1, 0.15, 0.12);
+            beep(784, t + 0.2, 0.25, 0.12);
+          } else if (type === 'uncheck') {
+            beep(500, t, 0.12, 0.07);
+            beep(380, t + 0.08, 0.12, 0.05);
+          } else if (type === 'delete') {
+            beep(320, t, 0.06, 0.08, 'square');
+            beep(200, t + 0.05, 0.08, 0.05, 'square');
+          }
+        };
+        if (ctx.state === 'suspended') ctx.resume().then(doPlay);
+        else doPlay();
+      } catch (e) {
+        console.warn('Sound error:', e, type);
+      }
+    }
+
+    // ─── Mutations ───────────────────────────────────────────────
+    function addTask() {
+      const text = taskInput.value.trim();
+      if (!text) {
+        taskInput.classList.remove('shake');
+        void taskInput.offsetWidth; // reflow to restart animation
+        taskInput.classList.add('shake');
+        taskInput.focus();
+        return;
+      }
+      state.tasks.unshift({ id: uid(), text, done: false, createdAt: Date.now() });
+      taskInput.value = '';
+      taskInput.focus();
+      saveState();
+      render();
+      playSound('add');
+    }
+
+    function toggleTask(id) {
+      const task = state.tasks.find(t => t.id === id);
+      if (!task) return;
+      const checking = !task.done;
+      task.done = checking;
+      if (checking) {
+        state.archive = state.archive.filter(a => a.id !== id);
+        state.archive.unshift({ id, text: task.text, completedAt: Date.now() });
+      } else {
+        state.archive = state.archive.filter(a => a.id !== id);
+      }
+      saveState();
+      render();
+      playSound(checking ? 'complete' : 'uncheck');
+      if (checking) {
+        const li  = taskList.querySelector(`[data-id="${id}"]`);
+        const chk = li && li.querySelector('.task-checkbox');
+        if (chk) {
+          chk.classList.remove('pop');
+          void chk.offsetWidth;
+          chk.classList.add('pop');
+          chk.addEventListener('animationend', () => chk.classList.remove('pop'), { once: true });
+        }
+      }
+    }
+
+    function removeArchiveEntry(id) {
+      state.archive = state.archive.filter(a => a.id !== id);
+      saveState();
+      renderCalendar();
+      if (calView.selectedKey) renderDayTasks(calView.selectedKey);
+    }
+
+    function clearDayArchive(dateKey) {
+      state.archive = state.archive.filter(a => toDateKey(a.completedAt) !== dateKey);
+      saveState();
+      renderCalendar();
+      renderDayTasks(dateKey);
+    }
+
+    // ─── Calendar helpers ─────────────────────────────────────────
+    function toDateKey(ts) {
+      const d = new Date(ts);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    function todayKey() { return toDateKey(Date.now()); }
+
+    function getEntriesForDay(dateKey) {
+      return state.archive.filter(a => toDateKey(a.completedAt) === dateKey);
+    }
+
+    function getDaysWithEntries() {
+      return new Set(state.archive.map(a => toDateKey(a.completedAt)));
+    }
+
+    function getYearRange() {
+      if (!state.archive.length) return [today.getFullYear()];
+      const years = state.archive.map(a => new Date(a.completedAt).getFullYear());
+      const min = Math.min(...years);
+      const max = Math.max(Math.max(...years), today.getFullYear());
+      const range = [];
+      for (let y = max; y >= min; y--) range.push(y);
+      return range;
+    }
+
+    // ─── Calendar render ──────────────────────────────────────────
+    function renderArchive() {          // called from render(), keeps name stable
+      archiveCountPill.textContent = state.archive.length;
+      renderCalendar();
+    }
+
+    function renderCalendar() {
+      const { year, month, selectedKey } = calView;
+      const MONTHS = ['January','February','March','April','May','June',
+                      'July','August','September','October','November','December'];
+      const DOW    = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+      calMonthYear.textContent = MONTHS[month];
+
+      // Year selector
+      const years = getYearRange();
+      calYearSelect.innerHTML = '';
+      years.forEach(y => {
+        const opt = document.createElement('option');
+        opt.value = y; opt.textContent = y;
+        if (y === year) opt.selected = true;
+        calYearSelect.appendChild(opt);
+      });
+
+      const daysWithEntries = getDaysWithEntries();
+      const tk = todayKey();
+
+      calGrid.innerHTML = '';
+
+      // Day-of-week headers
+      DOW.forEach(d => {
+        const cell = document.createElement('div');
+        cell.className = 'cal-dow';
+        cell.textContent = d;
+        calGrid.appendChild(cell);
+      });
+
+      // Leading empty cells
+      const firstWeekday = new Date(year, month, 1).getDay();
+      for (let i = 0; i < firstWeekday; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'cal-day empty';
+        calGrid.appendChild(cell);
+      }
+
+      // Day cells
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      for (let d = 1; d <= daysInMonth; d++) {
+        const key = `${year}-${String(month + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const cell = document.createElement('div');
+        cell.className = 'cal-day';
+        cell.textContent = d;
+        if (key === tk)           cell.classList.add('is-today');
+        if (key === selectedKey)  cell.classList.add('is-selected');
+        if (daysWithEntries.has(key)) cell.classList.add('has-entries');
+        cell.addEventListener('click', () => selectDay(key));
+        calGrid.appendChild(cell);
+      }
+
+      // Re-render day tasks if a day is selected
+      if (selectedKey) renderDayTasks(selectedKey);
+    }
+
+    function selectDay(dateKey) {
+      calView.selectedKey = calView.selectedKey === dateKey ? null : dateKey;
+      renderCalendar();
+      if (calView.selectedKey) renderDayTasks(calView.selectedKey);
+      else calTasksPane.setAttribute('hidden', '');
+    }
+
+    function renderDayTasks(dateKey) {
+      const entries = getEntriesForDay(dateKey);
+      const [y, m, d] = dateKey.split('-').map(Number);
+      const dateLabel = new Date(y, m - 1, d).toLocaleDateString('en-US', {
+        weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+      });
+
+      calTasksPane.removeAttribute('hidden');
+      calTasksPane.innerHTML = '';
+      calTasksPane.classList.remove('slide-in');
+      void calTasksPane.offsetWidth;
+      calTasksPane.classList.add('slide-in');
+
+      // Header
+      const hdr = document.createElement('div');
+      hdr.className = 'cal-tasks-header';
+      const lbl = document.createElement('span');
+      lbl.className = 'cal-tasks-date-label';
+      lbl.textContent = dateLabel;
+      const clearBtn = document.createElement('button');
+      clearBtn.className = 'archive-clear-btn';
+      clearBtn.textContent = 'Clear day';
+      clearBtn.addEventListener('click', () => {
+        if (entries.length && confirm(`Clear all tasks for ${dateLabel}?`)) {
+          clearDayArchive(dateKey);
+        }
+      });
+      hdr.appendChild(lbl);
+      hdr.appendChild(clearBtn);
+      calTasksPane.appendChild(hdr);
+
+      if (!entries.length) {
+        const empty = document.createElement('p');
+        empty.className = 'archive-empty';
+        empty.textContent = 'No completed tasks on this day.';
+        calTasksPane.appendChild(empty);
+        return;
+      }
+
+      entries.forEach(entry => {
+        const row = document.createElement('div');
+        row.className = 'archive-item';
+
+        const icon = document.createElement('div');
+        icon.className = 'archive-check-icon';
+
+        const txt = document.createElement('span');
+        txt.className = 'archive-item-text';
+        txt.textContent = entry.text;
+
+        const time = document.createElement('span');
+        time.className = 'archive-item-time';
+        time.textContent = new Date(entry.completedAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+        const del = document.createElement('button');
+        del.className = 'archive-remove-btn';
+        del.title = 'Remove entry';
+        del.innerHTML = '&times;';
+        del.addEventListener('click', () => removeArchiveEntry(entry.id));
+
+        row.appendChild(icon);
+        row.appendChild(txt);
+        row.appendChild(time);
+        row.appendChild(del);
+        calTasksPane.appendChild(row);
+      });
+    }
+
+    function deleteTask(id) {
+      const li = taskList.querySelector(`[data-id="${id}"]`);
+      playSound('delete');
+      if (li) {
+        li.classList.add('removing');
+        li.addEventListener('animationend', () => {
+          state.tasks = state.tasks.filter(t => t.id !== id);
+          saveState();
+          render();
+        }, { once: true });
+      } else {
+        state.tasks = state.tasks.filter(t => t.id !== id);
+        saveState();
+        render();
+      }
+    }
+
+    // ─── Event handlers ──────────────────────────────────────────
+    addBtn.addEventListener('click', addTask);
+
+    taskInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') addTask();
+    });
+
+    taskInput.addEventListener('animationend', () => {
+      taskInput.classList.remove('shake');
+    });
+
+    // Delegated task list events
+    taskList.addEventListener('click', e => {
+      const li = e.target.closest('.task-item');
+      if (!li) return;
+      const id = li.dataset.id;
+      if (e.target.closest('.task-checkbox')) {
+        toggleTask(id);
+      } else if (e.target.closest('.task-delete')) {
+        deleteTask(id);
+      }
+    });
+
+    // Keyboard support for checkboxes
+    taskList.addEventListener('keydown', e => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const chk = e.target.closest('.task-checkbox');
+      if (!chk) return;
+      e.preventDefault();
+      const li = chk.closest('.task-item');
+      if (li) toggleTask(li.dataset.id);
+    });
+
+    // Archive toggle — smooth accordion
+    archiveToggleBtn.addEventListener('click', () => {
+      const isOpen = archivePanel.classList.contains('open');
+      archivePanel.classList.toggle('open', !isOpen);
+      archiveToggleBtn.classList.toggle('open', !isOpen);
+      archiveToggleBtn.setAttribute('aria-expanded', String(!isOpen));
+      if (!isOpen) {
+        calView.year  = today.getFullYear();
+        calView.month = today.getMonth();
+        calView.selectedKey = null;
+        calTasksPane.setAttribute('hidden', '');
+        renderCalendar();
+      }
+    });
+
+    // Calendar prev / next month
+    calPrevBtn.addEventListener('click', () => {
+      calView.month--;
+      if (calView.month < 0) { calView.month = 11; calView.year--; }
+      calView.selectedKey = null;
+      calTasksPane.setAttribute('hidden', '');
+      renderCalendar();
+    });
+
+    calNextBtn.addEventListener('click', () => {
+      calView.month++;
+      if (calView.month > 11) { calView.month = 0; calView.year++; }
+      calView.selectedKey = null;
+      calTasksPane.setAttribute('hidden', '');
+      renderCalendar();
+    });
+
+    // Year select dropdown
+    calYearSelect.addEventListener('change', () => {
+      calView.year = Number(calYearSelect.value);
+      calView.selectedKey = null;
+      calTasksPane.setAttribute('hidden', '');
+      renderCalendar();
+    });
+
+    // Theme picker — pop animation on selected swatch
+    themePicker.addEventListener('click', e => {
+      const swatch = e.target.closest('.swatch');
+      if (!swatch || swatch.dataset.theme === state.theme) return;
+      state.theme = swatch.dataset.theme;
+      saveState();
+      updateTheme();
+      swatch.classList.remove('pop');
+      void swatch.offsetWidth;
+      swatch.classList.add('pop');
+      swatch.addEventListener('animationend', () => swatch.classList.remove('pop'), { once: true });
+    });
+
+    // ─── Init ────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      loadState();
+      render();
+      setInterval(updateHeader, 60_000);
+    });
+
+    // ─── PWA: Service Worker ─────────────────────────────────────
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+
+    // ─── PWA: Install prompt ──────────────────────────────────────
+    const installBtn = document.getElementById('installBtn');
+    let installPrompt = null;
+
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      installPrompt = e;
+      installBtn.hidden = false;
+      installBtn.classList.add('visible');
+    });
+
+    installBtn.addEventListener('click', async () => {
+      if (!installPrompt) return;
+      await installPrompt.prompt();
+      installPrompt = null;
+      installBtn.classList.remove('visible');
+      installBtn.hidden = true;
+    });
+
+    window.addEventListener('appinstalled', () => {
+      installPrompt = null;
+      installBtn.classList.remove('visible');
+      installBtn.hidden = true;
+    });
+  </script>
+</body>
+</html>
