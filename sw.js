@@ -1,9 +1,9 @@
-const CACHE = 'doit-v5';
+const CACHE = 'doit-v6';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './icon.svg',
+  './icon2.svg',
   './icon-192.png',
   './icon-512.png',
   './sw.js'

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="115" fill="#4f46e5"/>
+  <text x="190" y="275"
+        font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif"
+        font-weight="900" font-size="340" fill="white"
+        text-anchor="middle" dominant-baseline="middle">D</text>
+  <text x="385" y="275"
+        font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif"
+        font-weight="900" font-size="340" fill="white" fill-opacity="0.42"
+        text-anchor="middle" dominant-baseline="middle">!</text>
+
+</svg>
