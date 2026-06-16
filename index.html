@@ -1247,6 +1247,46 @@
       return li;
     }
 
+    // ─── Sound engine ────────────────────────────────────────────
+    let _actx = null;
+    function actx() {
+      if (!_actx) _actx = new (window.AudioContext || window.webkitAudioContext)();
+      return _actx;
+    }
+
+    function playSound(type) {
+      try {
+        const ctx = actx();
+        const t = ctx.currentTime;
+
+        const beep = (freq, startT, dur, vol = 0.12, wave = 'sine') => {
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.type = wave;
+          o.connect(g); g.connect(ctx.destination);
+          o.frequency.setValueAtTime(freq, startT);
+          g.gain.setValueAtTime(vol, startT);
+          g.gain.exponentialRampToValueAtTime(0.0001, startT + dur);
+          o.start(startT); o.stop(startT + dur);
+        };
+
+        if (type === 'add') {
+          beep(520, t, 0.08, 0.08);
+          beep(780, t + 0.07, 0.1, 0.06);
+        } else if (type === 'complete') {
+          beep(523, t, 0.15, 0.12);
+          beep(659, t + 0.1, 0.15, 0.12);
+          beep(784, t + 0.2, 0.25, 0.12);
+        } else if (type === 'uncheck') {
+          beep(500, t, 0.12, 0.07);
+          beep(380, t + 0.08, 0.12, 0.05);
+        } else if (type === 'delete') {
+          beep(320, t, 0.06, 0.08, 'square');
+          beep(200, t + 0.05, 0.08, 0.05, 'square');
+        }
+      } catch (_) {}
+    }
+
     // ─── Mutations ───────────────────────────────────────────────
     function addTask() {
       const text = taskInput.value.trim();
@@ -1262,6 +1302,7 @@
       taskInput.focus();
       saveState();
       render();
+      playSound('add');
     }
 
     function toggleTask(id) {
@@ -1277,6 +1318,7 @@
       }
       saveState();
       render();
+      playSound(checking ? 'complete' : 'uncheck');
       if (checking) {
         const li  = taskList.querySelector(`[data-id="${id}"]`);
         const chk = li && li.querySelector('.task-checkbox');
@@ -1469,6 +1511,7 @@
 
     function deleteTask(id) {
       const li = taskList.querySelector(`[data-id="${id}"]`);
+      playSound('delete');
       if (li) {
         li.classList.add('removing');
         li.addEventListener('animationend', () => {
