@@ -101,3 +101,32 @@ Then push normally. This happens when files were uploaded manually to GitHub bef
 **Windows: use `py` not `python` for the Python launcher.**
 `python` on Windows 11 is a Microsoft Store stub that opens the Store instead of running Python.
 The `py` launcher (`py server.py`, `py -m pip install ...`) always resolves correctly.
+
+---
+
+## Recurring / Weekly Features
+
+**Match JS class names exactly to CSS — mismatches are silent rendering failures.**
+When building JS that creates DOM elements, always read the CSS before choosing class names.
+Two specific traps hit in this project:
+- CSS had `.task-badge-repeat` / `.task-badge-alarm`; JS accidentally used `.badge-repeat` / `.badge-alarm` (missing `task-` prefix). The badges rendered but had no styles.
+- CSS had `.day-pill.on` for the active/selected state; JS used `.day-pill.active`. Pills never turned accent-coloured.
+Fix: grep the CSS for the exact selector before writing `element.className = ...` in JS.
+
+**Use `div` not `span` for stacked text inside a flex column.**
+`span` is `display: inline` by default, so `margin-top` has no effect and two sibling spans run together on one line.
+Using `div` (or adding `display: block` in CSS) is needed when you want the title and subtitle to stack vertically inside a flex container.
+
+**`Notification.requestPermission()` should be deferred to DOMContentLoaded.**
+Calling it at parse time does nothing useful — browsers require a user gesture or a loaded document context.
+Always call it inside the `DOMContentLoaded` listener and only request if `Notification.permission === 'default'`.
+
+**Schedule midnight respawn with recursive `setTimeout`, not `setInterval`.**
+`setInterval(fn, 86_400_000)` drifts because it counts from when the page loaded, not from midnight.
+A recursive `setTimeout` that calculates exact ms to the next `00:00:05` always fires at the right wall-clock time:
+```js
+function scheduleMidnightRespawn() {
+  const next = new Date(); next.setHours(24, 0, 5, 0);
+  setTimeout(() => { spawnRecurringTasks(); scheduleAlarms(); render(); scheduleMidnightRespawn(); }, next - Date.now());
+}
+```
