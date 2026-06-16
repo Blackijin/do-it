@@ -62,6 +62,18 @@ Wait ~60 s and test with a no-cache header before concluding a deploy failed.
 Chrome caches PWA icons aggressively. If an icon change doesn't appear, rename the file
 (e.g. `icon.svg` → `icon2.svg`) and update all references in `manifest.json`.
 
+**A desktop browser tab favicon needs an explicit `<link rel="icon">` — the manifest and `apple-touch-icon` do NOT supply it.**
+Symptom: the app icon shows fine once installed (manifest icons) and on iOS home screen
+(`apple-touch-icon`), but the browser **tab** on PC is blank. Desktop Chrome/Edge/Firefox look
+for `<link rel="icon">` and otherwise fall back to `/favicon.ico` at the origin root — which
+doesn't exist on GitHub Pages project sites. Fix: add an SVG favicon plus PNG fallbacks in
+`<head>`:
+```html
+<link rel="icon" type="image/svg+xml" href="icon2.svg" />
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+```
+Also point `apple-touch-icon` at a **PNG**, not an SVG — iOS silently ignores SVG apple-touch-icons.
+
 ---
 
 ## Mobile / PWA
