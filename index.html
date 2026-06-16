@@ -1791,6 +1791,14 @@
           } else if (type === 'delete') {
             beep(320, t, 0.06, 0.08, 'square');
             beep(200, t + 0.05, 0.08, 0.05, 'square');
+          } else if (type === 'complete-all') {
+            // Triumphant fanfare: ascending arpeggio + final chord
+            beep(523, t,        0.12, 0.13);
+            beep(659, t + 0.10, 0.12, 0.13);
+            beep(784, t + 0.20, 0.12, 0.13);
+            beep(1047,t + 0.30, 0.30, 0.14);
+            beep(784, t + 0.30, 0.30, 0.09);
+            beep(523, t + 0.30, 0.30, 0.07);
           }
         };
         if (ctx.state === 'suspended') ctx.resume().then(doPlay);
@@ -2198,7 +2206,7 @@
 
       saveState();
       render();
-      playSound(checking ? 'complete' : 'uncheck');
+      playSound(allDone && task.done ? 'complete-all' : checking ? 'complete' : 'uncheck');
 
       if (allDone && task.done) {
         const li  = taskList.querySelector(`[data-id="${parentId}"]`);
