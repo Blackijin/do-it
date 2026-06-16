@@ -1325,6 +1325,136 @@
       .subtask-add-btn { width: 30px; height: 30px; }
       .subtask-item { padding: .6rem .75rem; }
     }
+    /* ─── Recurring task badges ─────────────────────────────── */
+    .task-badges { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
+    .task-badge {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: .68rem; font-weight: 600;
+      padding: 2px 7px; border-radius: 999px; white-space: nowrap; line-height: 1.4;
+    }
+    .task-badge-repeat { background: #ede9fe; color: #5b21b6; }
+    .task-badge-alarm  { background: #fef3c7; color: #92400e; }
+
+    /* ─── Weekly toggle button ───────────────────────────────── */
+    .weekly-toggle-btn {
+      display: flex; align-items: center; gap: .5rem;
+      margin: .75rem auto 0;
+      background: none; border: 1.5px solid var(--border);
+      border-radius: 999px; padding: .45rem 1.1rem;
+      font-size: .8rem; font-weight: 600; color: var(--text-secondary);
+      transition: border-color var(--transition), color var(--transition), background var(--transition);
+    }
+    .weekly-toggle-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+    .weekly-toggle-btn svg { width: 14px; height: 14px; transition: transform var(--transition); }
+    .weekly-toggle-btn.open svg:last-child { transform: rotate(180deg); }
+    .weekly-count-pill { background: var(--accent-soft); color: var(--accent); border-radius: 999px; padding: .1rem .45rem; font-size: .72rem; }
+
+    /* ─── Weekly panel ───────────────────────────────────────── */
+    .weekly-panel {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-md);
+      max-height: 0; opacity: 0; margin-top: 0; pointer-events: none; border-width: 0;
+      transition:
+        max-height .42s cubic-bezier(.4,0,.2,1), opacity .28s ease, margin-top .3s ease,
+        border-width 0s .42s, background var(--transition), border-color var(--transition);
+    }
+    .weekly-panel.open {
+      max-height: 1800px; opacity: 1; margin-top: .75rem; pointer-events: auto; border-width: 1px;
+      transition:
+        max-height .42s cubic-bezier(.4,0,.2,1), opacity .28s ease, margin-top .3s ease,
+        border-width 0s, background var(--transition), border-color var(--transition);
+    }
+
+    /* ─── Weekly items ───────────────────────────────────────── */
+    .weekly-item {
+      display: flex; align-items: flex-start; gap: .65rem;
+      padding: .75rem 1rem; border-bottom: 1px solid var(--border);
+      transition: background var(--transition);
+    }
+    .weekly-item:hover { background: var(--accent-soft); }
+    .weekly-item-icon {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--accent-soft);
+      display: grid; place-items: center; flex-shrink: 0; margin-top: 1px;
+    }
+    .weekly-item-icon svg { width: 14px; height: 14px; stroke: var(--accent); }
+    .weekly-item-body { flex: 1; min-width: 0; }
+    .weekly-item-text { font-size: .9rem; font-weight: 600; color: var(--text-primary); }
+    .weekly-item-meta { font-size: .75rem; color: var(--text-secondary); margin-top: 2px; }
+    .weekly-item-actions { display: flex; gap: .35rem; }
+    .weekly-icon-btn {
+      width: 28px; height: 28px; border-radius: 7px;
+      border: 1px solid var(--border); background: none;
+      display: grid; place-items: center; color: var(--text-muted); flex-shrink: 0;
+      transition: color var(--transition), background var(--transition), border-color var(--transition);
+    }
+    .weekly-icon-btn svg { width: 13px; height: 13px; }
+    .weekly-icon-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+    .weekly-icon-btn.del:hover { color: #ef4444; border-color: #ef4444; background: rgba(239,68,68,.08); }
+    .weekly-empty { padding: 1.25rem 1rem; text-align: center; color: var(--text-muted); font-size: .82rem; }
+    .add-weekly-btn {
+      display: flex; align-items: center; justify-content: center; gap: .4rem;
+      width: calc(100% - 2rem); margin: .65rem 1rem .75rem; padding: .6rem;
+      border: 1.5px dashed var(--border); border-radius: var(--radius-sm);
+      background: none; color: var(--text-secondary); font-size: .82rem; font-weight: 600;
+      transition: border-color var(--transition), color var(--transition), background var(--transition);
+    }
+    .add-weekly-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+    .add-weekly-btn svg { width: 14px; height: 14px; }
+
+    /* ─── Weekly bottom sheet ────────────────────────────────── */
+    .weekly-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,.4);
+      opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 199;
+    }
+    .weekly-backdrop.open { opacity: 1; pointer-events: auto; }
+    .weekly-sheet {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: var(--bg-card); border-top: 1.5px solid var(--border);
+      border-radius: 20px 20px 0 0;
+      padding: 8px 20px calc(36px + env(safe-area-inset-bottom));
+      transform: translateY(100%); transition: transform .3s cubic-bezier(.4,0,.2,1); z-index: 200;
+    }
+    .weekly-sheet.open { transform: translateY(0); }
+    .weekly-sheet-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 12px auto 16px; }
+    .weekly-sheet-title { font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 14px; }
+    .weekly-text-input {
+      width: 100%; border: 1.5px solid var(--border); border-radius: 9px;
+      padding: 10px 12px; font-size: 15px; color: var(--text-primary);
+      background: var(--bg-input); outline: none; margin-bottom: 16px;
+      transition: border-color var(--transition);
+    }
+    .weekly-text-input:focus { border-color: var(--border-focus); }
+    .weekly-days-label { font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
+    .weekly-days-row { display: flex; gap: 5px; margin-bottom: 16px; }
+    .day-pill {
+      flex: 1; padding: 7px 0; text-align: center; border-radius: 999px;
+      border: 1.5px solid var(--border); font-size: 11px; font-weight: 700;
+      color: var(--text-secondary); background: none;
+      transition: background .15s, border-color .15s, color .15s;
+    }
+    .day-pill.on { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+    .weekly-alarm-row {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+      padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 9px;
+    }
+    .weekly-alarm-label { flex: 1; font-size: 14px; color: var(--text-secondary); }
+    .weekly-alarm-input { border: none; background: transparent; font-size: 14px; font-weight: 700; color: var(--text-primary); outline: none; }
+    .weekly-save-btn {
+      width: 100%; padding: 12px; background: var(--accent); color: var(--accent-text);
+      border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer;
+      margin-bottom: 8px; transition: background var(--transition);
+    }
+    .weekly-save-btn:hover { background: var(--accent-hover); }
+    .weekly-delete-btn {
+      width: 100%; padding: 11px; background: none; border: 1.5px solid var(--border);
+      border-radius: 10px; color: #ef4444; font-size: 14px; font-weight: 600; cursor: pointer;
+    }
+
+    @media (pointer: coarse) {
+      .weekly-icon-btn { width: 34px; height: 34px; }
+      .day-pill { padding: 9px 0; }
+    }
+
     /* ─── Settings button ───────────────────────────────────── */
     .settings-btn {
       background: none;
@@ -1537,6 +1667,51 @@
       <div class="cal-tasks-pane" id="calTasksPane" hidden></div>
     </div>
 
+    <!-- WEEKLY TOGGLE BUTTON -->
+    <button class="weekly-toggle-btn" id="weeklyToggleBtn" aria-expanded="false">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <path d="M14 8A6 6 0 1 1 2 8"/><path d="M14 8l-2-2M14 8l-2 2"/>
+      </svg>
+      Weekly
+      <span class="weekly-count-pill" id="weeklyCountPill">0</span>
+      <svg viewBox="0 0 16 16" fill="none">
+        <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
+    <!-- WEEKLY PANEL -->
+    <div class="weekly-panel" id="weeklyPanel">
+      <div id="weeklyList"></div>
+      <button class="add-weekly-btn" id="addWeeklyBtn">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Add weekly task
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Weekly task sheet -->
+  <div class="weekly-backdrop" id="weeklyBackdrop"></div>
+  <div class="weekly-sheet" id="weeklySheet" role="dialog" aria-modal="true" aria-label="Weekly task">
+    <div class="weekly-sheet-handle"></div>
+    <p class="weekly-sheet-title">Weekly task</p>
+    <input type="text" class="weekly-text-input" id="weeklyTextInput" placeholder="What repeats each week?" maxlength="200" />
+    <p class="weekly-days-label">Repeat on</p>
+    <div class="weekly-days-row" id="weeklyDaysRow">
+      <button class="day-pill" data-day="0">Su</button>
+      <button class="day-pill" data-day="1">Mo</button>
+      <button class="day-pill" data-day="2">Tu</button>
+      <button class="day-pill" data-day="3">We</button>
+      <button class="day-pill" data-day="4">Th</button>
+      <button class="day-pill" data-day="5">Fr</button>
+      <button class="day-pill" data-day="6">Sa</button>
+    </div>
+    <div class="weekly-alarm-row">
+      <span class="weekly-alarm-label">⏰ Alarm time (optional)</span>
+      <input type="time" id="weeklyAlarmInput" class="weekly-alarm-input" />
+    </div>
+    <button class="weekly-save-btn" id="weeklySaveBtn">Save weekly task</button>
+    <button class="weekly-delete-btn" id="weeklyDeleteBtn" hidden>Remove recurring task</button>
   </div>
 
   <!-- Settings sheet -->
@@ -1621,7 +1796,8 @@
       archive: [],
       theme: 'light',
       soundsOn: true,
-      showCompleted: true
+      showCompleted: true,
+      recurring: []
     };
 
     // ─── Persistence ─────────────────────────────────────────────
@@ -1657,6 +1833,18 @@
     const calPrevBtn       = document.getElementById('calPrevBtn');
     const calNextBtn       = document.getElementById('calNextBtn');
     const calTasksPane     = document.getElementById('calTasksPane');
+    const weeklyToggleBtn  = document.getElementById('weeklyToggleBtn');
+    const weeklyPanel      = document.getElementById('weeklyPanel');
+    const weeklyCountPill  = document.getElementById('weeklyCountPill');
+    const weeklyList       = document.getElementById('weeklyList');
+    const addWeeklyBtn     = document.getElementById('addWeeklyBtn');
+    const weeklyBackdrop   = document.getElementById('weeklyBackdrop');
+    const weeklySheet      = document.getElementById('weeklySheet');
+    const weeklyTextInput  = document.getElementById('weeklyTextInput');
+    const weeklyDaysRow    = document.getElementById('weeklyDaysRow');
+    const weeklyAlarmInput = document.getElementById('weeklyAlarmInput');
+    const weeklySaveBtn    = document.getElementById('weeklySaveBtn');
+    const weeklyDeleteBtn  = document.getElementById('weeklyDeleteBtn');
     const settingsBtn      = document.getElementById('settingsBtn');
     const settingsBackdrop = document.getElementById('settingsBackdrop');
     const settingsSheet    = document.getElementById('settingsSheet');
@@ -1695,6 +1883,7 @@
       updateHeader();
       renderTaskList();
       renderArchive();
+      renderWeeklySection();
       updateSettingsUI();
     }
 
@@ -1810,6 +1999,26 @@
         wrap.appendChild(track);
         wrap.appendChild(lbl);
         main.appendChild(wrap);
+      }
+
+      // Recurring badges
+      if (task.recurringId) {
+        const rec = (state.recurring || []).find(r => r.id === task.recurringId);
+        if (rec) {
+          const badges = document.createElement('div');
+          badges.className = 'task-badges';
+          const repeatBadge = document.createElement('span');
+          repeatBadge.className = 'task-badge task-badge-repeat';
+          repeatBadge.innerHTML = `<svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 4 1 7 4"/><path d="M4 1v8a4 4 0 0 0 4 4h3"/><polyline points="9 12 12 15 15 12"/><path d="M12 15V7a4 4 0 0 0-4-4H5"/></svg>${formatDays(rec.days)}`;
+          badges.appendChild(repeatBadge);
+          if (rec.alarmTime) {
+            const alarmBadge = document.createElement('span');
+            alarmBadge.className = 'task-badge task-badge-alarm';
+            alarmBadge.innerHTML = `<svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="9" r="5"/><path d="M8 6v3l2 1"/><path d="M3 3l-2 2M13 3l2 2"/></svg>${formatAlarmTime(rec.alarmTime)}`;
+            badges.appendChild(alarmBadge);
+          }
+          main.appendChild(badges);
+        }
       }
 
       // Timer countdown
@@ -2144,6 +2353,92 @@
 
     function todayKey() { return toDateKey(Date.now()); }
 
+    // ─── Recurring helpers ────────────────────────────────────────
+    const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    function formatDays(days) {
+      if (!days || days.length === 0) return '';
+      if (days.length === 7) return 'Every day';
+      if (days.length === 5 && !days.includes(0) && !days.includes(6)) return 'Weekdays';
+      if (days.length === 2 &&  days.includes(0) &&  days.includes(6)) return 'Weekends';
+      return days.map(d => DAY_NAMES[d]).join(', ');
+    }
+
+    function formatAlarmTime(str) {
+      if (!str) return '';
+      const [h, m] = str.split(':').map(Number);
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      const hh   = h % 12 || 12;
+      return `${hh}:${String(m).padStart(2,'0')} ${ampm}`;
+    }
+
+    function spawnRecurringTasks() {
+      if (!state.recurring || !state.recurring.length) return;
+      const todayDow = new Date().getDay();
+      const tKey     = todayKey();
+      state.recurring.forEach(rec => {
+        if (!rec.days.includes(todayDow)) return;
+        const alreadyExists = state.tasks.some(
+          t => t.recurringId === rec.id && toDateKey(t.createdAt) === tKey
+        );
+        if (alreadyExists) return;
+        state.tasks.unshift({
+          id:          crypto.randomUUID(),
+          text:        rec.text,
+          done:        false,
+          createdAt:   Date.now(),
+          subtasks:    [],
+          subtasksOpen:false,
+          recurringId: rec.id
+        });
+      });
+      saveState();
+    }
+
+    const _alarmTimeouts = [];
+    function scheduleAlarms() {
+      _alarmTimeouts.forEach(clearTimeout);
+      _alarmTimeouts.length = 0;
+      if (!state.recurring) return;
+      if (Notification.permission !== 'granted') return;
+      const todayDow = new Date().getDay();
+      const now      = Date.now();
+      state.recurring.forEach(rec => {
+        if (!rec.alarmTime) return;
+        if (!rec.days.includes(todayDow)) return;
+        const [h, m]    = rec.alarmTime.split(':').map(Number);
+        const fireAt    = new Date();
+        fireAt.setHours(h, m, 0, 0);
+        const delay = fireAt - now;
+        if (delay <= 0) return;
+        const tid = setTimeout(() => {
+          const task = state.tasks.find(
+            t => t.recurringId === rec.id && toDateKey(t.createdAt) === todayKey()
+          );
+          if (task && !task.done) {
+            new Notification('Do It — Reminder', {
+              body: rec.text,
+              icon: './icon-192.png',
+              tag:  `alarm-${rec.id}`
+            });
+          }
+        }, delay);
+        _alarmTimeouts.push(tid);
+      });
+    }
+
+    function scheduleMidnightRespawn() {
+      const now  = new Date();
+      const next = new Date(now);
+      next.setHours(24, 0, 5, 0);
+      const delay = next - now;
+      setTimeout(() => {
+        spawnRecurringTasks();
+        scheduleAlarms();
+        render();
+        scheduleMidnightRespawn();
+      }, delay);
+    }
+
     function getEntriesForDay(dateKey) {
       return state.archive.filter(a => toDateKey(a.completedAt) === dateKey);
     }
@@ -2160,6 +2455,51 @@
       const range = [];
       for (let y = max; y >= min; y--) range.push(y);
       return range;
+    }
+
+    // ─── Weekly section render ────────────────────────────────────
+    function renderWeeklySection() {
+      const recs = state.recurring || [];
+      weeklyCountPill.textContent = recs.length || '';
+      weeklyCountPill.style.display = recs.length ? '' : 'none';
+      weeklyList.innerHTML = '';
+      if (recs.length === 0) {
+        const empty = document.createElement('p');
+        empty.className = 'weekly-empty';
+        empty.textContent = 'No weekly tasks yet — tap + to add one.';
+        weeklyList.appendChild(empty);
+        return;
+      }
+      recs.forEach(rec => {
+        const item = document.createElement('div');
+        item.className = 'weekly-item';
+        item.dataset.id = rec.id;
+
+        const info = document.createElement('div');
+        info.className = 'weekly-item-body';
+
+        const name = document.createElement('div');
+        name.className = 'weekly-item-text';
+        name.textContent = rec.text;
+
+        const meta = document.createElement('div');
+        meta.className = 'weekly-item-meta';
+        meta.textContent = formatDays(rec.days) + (rec.alarmTime ? ` · ${formatAlarmTime(rec.alarmTime)}` : '');
+
+        info.appendChild(name);
+        info.appendChild(meta);
+
+        const editBtn = document.createElement('button');
+        editBtn.className = 'weekly-icon-btn';
+        editBtn.setAttribute('aria-label', 'Edit');
+        editBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 2.5a2.12 2.12 0 0 1 3 3L5 15H1v-4L11.5 2.5z"/></svg>`;
+        editBtn.dataset.action = 'edit-weekly';
+        editBtn.dataset.id = rec.id;
+
+        item.appendChild(info);
+        item.appendChild(editBtn);
+        weeklyList.appendChild(item);
+      });
     }
 
     // ─── Calendar render ──────────────────────────────────────────
@@ -2525,6 +2865,98 @@
       renderCalendar();
     });
 
+    // ─── Weekly mutations ─────────────────────────────────────────
+    let _editingRecId = null;
+
+    function openWeeklySheet(id) {
+      _editingRecId = id || null;
+      if (id) {
+        const rec = (state.recurring || []).find(r => r.id === id);
+        if (!rec) return;
+        weeklyTextInput.value  = rec.text;
+        weeklyAlarmInput.value = rec.alarmTime || '';
+        weeklyDaysRow.querySelectorAll('.day-pill').forEach(pill => {
+          pill.classList.toggle('on', rec.days.includes(Number(pill.dataset.day)));
+        });
+        weeklyDeleteBtn.hidden = false;
+      } else {
+        weeklyTextInput.value  = '';
+        weeklyAlarmInput.value = '';
+        weeklyDaysRow.querySelectorAll('.day-pill').forEach(p => p.classList.remove('on'));
+        weeklyDeleteBtn.hidden = true;
+      }
+      weeklyBackdrop.classList.add('open');
+      weeklySheet.classList.add('open');
+      requestAnimationFrame(() => weeklyTextInput.focus());
+    }
+
+    function closeWeeklySheet() {
+      weeklyBackdrop.classList.remove('open');
+      weeklySheet.classList.remove('open');
+      _editingRecId = null;
+    }
+
+    function saveWeeklyTask() {
+      const text = weeklyTextInput.value.trim();
+      if (!text) { weeklyTextInput.classList.add('shake'); setTimeout(() => weeklyTextInput.classList.remove('shake'), 400); return; }
+      const selectedDays = [...weeklyDaysRow.querySelectorAll('.day-pill.on')].map(p => Number(p.dataset.day));
+      if (selectedDays.length === 0) { weeklyDaysRow.classList.add('shake'); setTimeout(() => weeklyDaysRow.classList.remove('shake'), 400); return; }
+      const alarmTime = weeklyAlarmInput.value || '';
+
+      if (!state.recurring) state.recurring = [];
+      if (_editingRecId) {
+        const rec = state.recurring.find(r => r.id === _editingRecId);
+        if (rec) { rec.text = text; rec.days = selectedDays; rec.alarmTime = alarmTime; }
+      } else {
+        state.recurring.push({ id: crypto.randomUUID(), text, days: selectedDays, alarmTime });
+      }
+      saveState();
+      closeWeeklySheet();
+      render();
+      scheduleAlarms();
+      spawnRecurringTasks();
+      render();
+    }
+
+    function deleteRecurring(id) {
+      state.recurring = (state.recurring || []).filter(r => r.id !== id);
+      state.tasks = state.tasks.filter(t => t.recurringId !== id);
+      saveState();
+      closeWeeklySheet();
+      render();
+    }
+
+    // Weekly toggle accordion
+    weeklyToggleBtn.addEventListener('click', () => {
+      weeklyPanel.classList.toggle('open');
+      weeklyToggleBtn.classList.toggle('open');
+    });
+
+    // + button opens blank sheet
+    addWeeklyBtn.addEventListener('click', () => openWeeklySheet(null));
+
+    // Backdrop closes sheet
+    weeklyBackdrop.addEventListener('click', closeWeeklySheet);
+
+    // Day pills toggle
+    weeklyDaysRow.addEventListener('click', e => {
+      const pill = e.target.closest('.day-pill');
+      if (pill) pill.classList.toggle('on');
+    });
+
+    // Save / Delete buttons
+    weeklySaveBtn.addEventListener('click', saveWeeklyTask);
+    weeklyDeleteBtn.addEventListener('click', () => _editingRecId && deleteRecurring(_editingRecId));
+
+    // Edit button on list items
+    weeklyList.addEventListener('click', e => {
+      const btn = e.target.closest('[data-action="edit-weekly"]');
+      if (btn) openWeeklySheet(btn.dataset.id);
+    });
+
+    // Enter to save in weekly text input
+    weeklyTextInput.addEventListener('keydown', e => { if (e.key === 'Enter') saveWeeklyTask(); });
+
     // Theme picker — pop animation on selected swatch
     themePicker.addEventListener('click', e => {
       const swatch = e.target.closest('.swatch');
@@ -2541,9 +2973,17 @@
     // ─── Init ────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', () => {
       loadState();
+      spawnRecurringTasks();
       render();
       setInterval(updateHeader, 60_000);
       setInterval(tickTimers, 1000);
+      scheduleMidnightRespawn();
+      // Request notification permission silently for recurring alarms
+      if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission().then(p => { if (p === 'granted') scheduleAlarms(); });
+      } else {
+        scheduleAlarms();
+      }
     });
 
     // ─── PWA: Service Worker ─────────────────────────────────────
