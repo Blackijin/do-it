@@ -1254,6 +1254,17 @@
       return _actx;
     }
 
+    // Unlock Web Audio on first touch (required on Android/iOS)
+    document.addEventListener('touchstart', function unlockAudio() {
+      const ctx = actx();
+      const buf = ctx.createBuffer(1, 1, 22050);
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      src.connect(ctx.destination);
+      src.start(0);
+      ctx.resume();
+    }, { once: true });
+
     function playSound(type) {
       try {
         const ctx = actx();
