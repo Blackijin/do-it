@@ -1199,6 +1199,27 @@
 
   </div>
 
+  <!-- Timer bottom sheet -->
+  <div class="timer-backdrop" id="timerBackdrop"></div>
+  <div class="timer-sheet" id="timerSheet" aria-modal="true" role="dialog">
+    <div class="timer-sheet-handle"></div>
+    <h3>Set timer</h3>
+    <div class="timer-presets">
+      <button class="timer-preset" data-mins="5">5 min</button>
+      <button class="timer-preset" data-mins="10">10 min</button>
+      <button class="timer-preset" data-mins="15">15 min</button>
+      <button class="timer-preset" data-mins="30">30 min</button>
+      <button class="timer-preset" data-mins="60">1 hour</button>
+    </div>
+    <div class="timer-custom">
+      <input type="number" id="timerCustomInput" min="1" max="999" placeholder="—">
+      <label for="timerCustomInput">minutes</label>
+      <button class="timer-set-btn" id="timerSetBtn">Set</button>
+    </div>
+    <button class="timer-clear-btn" id="timerClearBtn" hidden>Remove timer</button>
+  </div>
+  <div class="timer-toast" id="timerToast"></div>
+
   <script>
     // ─── State ───────────────────────────────────────────────────
     const STORAGE_KEY = 'doit-app-v1';
@@ -1927,28 +1948,5 @@
       installBtn.hidden = true;
     });
   </script>
-
-  <!-- Timer bottom sheet -->
-  <div class="timer-backdrop" id="timerBackdrop"></div>
-  <div class="timer-sheet" id="timerSheet" aria-modal="true" role="dialog">
-    <div class="timer-sheet-handle"></div>
-    <h3>Set timer</h3>
-    <div class="timer-presets">
-      <button class="timer-preset" data-mins="5">5 min</button>
-      <button class="timer-preset" data-mins="10">10 min</button>
-      <button class="timer-preset" data-mins="15">15 min</button>
-      <button class="timer-preset" data-mins="30">30 min</button>
-      <button class="timer-preset" data-mins="60">1 hour</button>
-    </div>
-    <div class="timer-custom">
-      <input type="number" id="timerCustomInput" min="1" max="999" placeholder="—">
-      <label for="timerCustomInput">minutes</label>
-      <button class="timer-set-btn" id="timerSetBtn">Set</button>
-    </div>
-    <button class="timer-clear-btn" id="timerClearBtn" hidden>Remove timer</button>
-  </div>
-
-  <!-- Timer fired toast -->
-  <div class="timer-toast" id="timerToast"></div>
 </body>
 </html>
