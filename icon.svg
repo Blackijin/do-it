@@ -8,8 +8,5 @@
         font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif"
         font-weight="900" font-size="340" fill="white" fill-opacity="0.42"
         text-anchor="middle" dominant-baseline="middle">!</text>
-  <text x="256" y="450"
-        font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif"
-        font-weight="600" font-size="70" fill="white" fill-opacity="0.55"
-        text-anchor="middle" dominant-baseline="middle" letter-spacing="8">DO IT</text>
+
 </svg>
