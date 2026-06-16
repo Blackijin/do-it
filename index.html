@@ -412,8 +412,8 @@
     }
 
     @keyframes taskExit {
-      0%   { opacity: 1; transform: translateX(0);    max-height: 80px; padding: .7rem 1rem; }
-      100% { opacity: 0; transform: translateX(24px); max-height: 0;    padding: 0   1rem; }
+      0%   { opacity: 1; transform: translateX(0);    max-height: 300px; }
+      100% { opacity: 0; transform: translateX(24px); max-height: 0; }
     }
 
     @keyframes checkPop {
@@ -458,23 +458,32 @@
 
     /* ─── Task item ──────────────────────────────────────────── */
     .task-item {
-      display: flex;
-      align-items: center;
-      gap: .75rem;
-      padding: .7rem 1rem;
       border-bottom: 1px solid var(--border);
       animation: taskEnter .22s cubic-bezier(.2,.8,.4,1);
-      transition: background var(--transition);
       position: relative;
     }
 
     .task-item:last-child { border-bottom: none; }
-    .task-item:hover { background: var(--accent-soft); }
 
     .task-item.removing {
       animation: taskExit .22s ease forwards;
       pointer-events: none;
       overflow: hidden;
+    }
+
+    .task-row {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      padding: .7rem 1rem;
+      transition: background var(--transition);
+    }
+
+    .task-row:hover { background: var(--accent-soft); }
+
+    .task-main {
+      flex: 1;
+      min-width: 0;
     }
 
     /* ─── Circular checkbox ──────────────────────────────────── */
@@ -525,7 +534,7 @@
 
     /* ─── Task text ──────────────────────────────────────────── */
     .task-text {
-      flex: 1;
+      display: block;
       font-size: .95rem;
       color: var(--text-primary);
       word-break: break-word;
@@ -558,8 +567,8 @@
       transition: opacity .15s, color .15s, background .15s, transform .15s cubic-bezier(.2,.8,.4,1);
     }
 
-    .task-item:hover .task-delete,
-    .task-item:focus-within .task-delete { opacity: 1; transform: scale(1); }
+    .task-row:hover .task-delete,
+    .task-row:focus-within .task-delete { opacity: 1; transform: scale(1); }
 
     .task-delete:hover {
       color: #ef4444;
@@ -581,8 +590,9 @@
       transition: opacity .15s, color .15s, background .15s;
       flex-shrink: 0;
     }
-    .task-item:hover .timer-btn,
-    .task-item:focus-within .timer-btn { opacity: .65; }
+    .task-row:hover .timer-btn,
+    .task-row:focus-within .timer-btn { opacity: .65; }
+    .task-row:hover .subtask-expand-btn { opacity: .55; }
     .timer-btn.active  { opacity: 1 !important; color: var(--accent); }
     .timer-btn.burning { color: #ef4444 !important; opacity: 1 !important; }
     .timer-btn:hover   { color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
@@ -686,6 +696,155 @@
       overflow: hidden; text-overflow: ellipsis;
     }
     .timer-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    /* ─── Sub-task expand button ────────────────────────────── */
+    .subtask-expand-btn {
+      opacity: 0;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      padding: 5px;
+      border-radius: 6px;
+      line-height: 1;
+      flex-shrink: 0;
+      transition: opacity .15s, color .15s, background .15s, transform .2s cubic-bezier(.4,0,.2,1);
+    }
+    .subtask-expand-btn svg {
+      transition: transform .2s cubic-bezier(.4,0,.2,1);
+      display: block;
+    }
+    .subtask-expand-btn.open { opacity: 1 !important; color: var(--accent); }
+    .subtask-expand-btn.open svg { transform: rotate(45deg); }
+    .subtask-expand-btn:hover { color: var(--accent); background: var(--accent-soft); }
+
+    /* ─── Sub-task progress bar (inside .task-main) ──────────── */
+    .subtask-progress-wrap {
+      display: flex;
+      align-items: center;
+      gap: .45rem;
+      margin-top: 5px;
+    }
+    .subtask-progress-track {
+      flex: 1;
+      height: 3px;
+      background: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .subtask-progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 999px;
+      transition: width .35s cubic-bezier(.4,0,.2,1), background var(--transition);
+    }
+    .subtask-progress-fill.complete { background: #22c55e; }
+    .subtask-progress-label {
+      font-size: .7rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ─── Sub-task section (accordion) ──────────────────────── */
+    .subtask-section {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height .3s cubic-bezier(.4,0,.2,1);
+      border-left: 3px solid var(--accent-soft);
+      margin-left: 1.1rem;
+    }
+    .subtask-section.open { max-height: 1200px; }
+
+    /* ─── Sub-task add row ───────────────────────────────────── */
+    .subtask-add-row {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .5rem .75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .subtask-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      font-size: .88rem;
+      color: var(--text-primary);
+      outline: none;
+    }
+    .subtask-input::placeholder { color: var(--text-muted); }
+    .subtask-add-btn {
+      width: 24px; height: 24px;
+      background: none;
+      border: 1.5px solid var(--border);
+      border-radius: 50%;
+      display: grid; place-items: center;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+      transition: background .15s, border-color .15s, color .15s;
+    }
+    .subtask-add-btn:hover { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+
+    /* ─── Sub-task items ─────────────────────────────────────── */
+    .subtask-item {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      padding: .45rem .75rem;
+      border-bottom: 1px solid var(--border);
+      animation: taskEnter .18s ease;
+      transition: background var(--transition);
+    }
+    .subtask-item:last-child { border-bottom: none; }
+    .subtask-item:hover { background: var(--accent-soft); }
+
+    .subtask-checkbox {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      cursor: pointer;
+      display: grid; place-items: center;
+      transition: border-color .18s, background .18s;
+    }
+    .subtask-checkbox:hover { border-color: var(--accent); }
+    .subtask-checkbox.checked { border-color: var(--accent); background: var(--accent); }
+    .subtask-checkbox.checked::after {
+      content: '';
+      width: 4px; height: 7px;
+      border: 1.5px solid var(--accent-text);
+      border-top: none; border-left: none;
+      transform: rotate(45deg) translateY(-1px);
+    }
+
+    .subtask-text {
+      flex: 1;
+      font-size: .88rem;
+      color: var(--text-secondary);
+      word-break: break-word;
+      text-decoration: line-through transparent;
+      transition: color .25s, text-decoration-color .25s, opacity .25s;
+    }
+    .subtask-item.done .subtask-text {
+      color: var(--task-done-text);
+      text-decoration-color: var(--task-done-text);
+      opacity: .55;
+    }
+
+    .subtask-delete {
+      opacity: 0;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: .9rem;
+      padding: .2rem .35rem;
+      border-radius: 4px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: opacity .15s, color .15s, background .15s;
+    }
+    .subtask-item:hover .subtask-delete { opacity: 1; }
+    .subtask-delete:hover { color: #ef4444; background: rgba(239,68,68,.1); }
 
     /* ─── Progress bar shimmer ───────────────────────────────── */
     .progress-bar-fill {
@@ -1157,6 +1316,14 @@
       .archive-toggle-btn {
         padding: .6rem 1.25rem;
       }
+
+      /* Subtask elements */
+      .subtask-expand-btn { opacity: .5; }
+      .subtask-expand-btn.open { opacity: 1; }
+      .subtask-delete { opacity: 1; }
+      .subtask-checkbox { width: 22px; height: 22px; }
+      .subtask-add-btn { width: 30px; height: 30px; }
+      .subtask-item { padding: .6rem .75rem; }
     }
   </style>
 </head>
@@ -1442,6 +1609,10 @@
       li.className = 'task-item' + (task.done ? ' done' : '');
       li.dataset.id = task.id;
 
+      // ── Task row (flex) ──────────────────────────────────────
+      const row = document.createElement('div');
+      row.className = 'task-row';
+
       // Checkbox
       const chk = document.createElement('div');
       chk.className = 'task-checkbox' + (task.done ? ' checked' : '');
@@ -1450,26 +1621,36 @@
       chk.setAttribute('tabindex', '0');
       chk.title = task.done ? 'Mark incomplete' : 'Mark complete';
 
-      // Text
+      // Task main: text + optional subtask progress bar
+      const main = document.createElement('div');
+      main.className = 'task-main';
+
       const txt = document.createElement('span');
       txt.className = 'task-text';
       txt.textContent = task.text;
+      main.appendChild(txt);
 
-      // Delete
-      const del = document.createElement('button');
-      del.className = 'task-delete';
-      del.setAttribute('aria-label', 'Delete task');
-      del.title = 'Delete';
-      del.innerHTML = '&times;';
+      const subs = task.subtasks || [];
+      if (subs.length > 0) {
+        const done = subs.filter(s => s.done).length;
+        const pct  = Math.round((done / subs.length) * 100);
+        const wrap = document.createElement('div');
+        wrap.className = 'subtask-progress-wrap';
+        const track = document.createElement('div');
+        track.className = 'subtask-progress-track';
+        const fill = document.createElement('div');
+        fill.className = 'subtask-progress-fill' + (done === subs.length ? ' complete' : '');
+        fill.style.width = `${pct}%`;
+        const lbl = document.createElement('span');
+        lbl.className = 'subtask-progress-label';
+        lbl.textContent = `${done}/${subs.length}`;
+        track.appendChild(fill);
+        wrap.appendChild(track);
+        wrap.appendChild(lbl);
+        main.appendChild(wrap);
+      }
 
-      // Timer button
-      const tmrBtn = document.createElement('button');
-      tmrBtn.className = 'timer-btn' + (task.timerEnd ? ' active' : '');
-      tmrBtn.setAttribute('aria-label', 'Set timer');
-      tmrBtn.title = 'Set timer';
-      tmrBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5V8l2.5 2"/></svg>`;
-
-      // Timer countdown (only shown when timer is active)
+      // Timer countdown
       const tmrDisplay = document.createElement('span');
       tmrDisplay.className = 'timer-countdown';
       tmrDisplay.dataset.id = task.id;
@@ -1482,12 +1663,86 @@
         tmrDisplay.hidden = true;
       }
 
-      li.appendChild(chk);
-      li.appendChild(txt);
-      li.appendChild(tmrDisplay);
-      li.appendChild(tmrBtn);
-      li.appendChild(del);
+      // Timer button
+      const tmrBtn = document.createElement('button');
+      tmrBtn.className = 'timer-btn' + (task.timerEnd ? ' active' : '');
+      tmrBtn.setAttribute('aria-label', 'Set timer');
+      tmrBtn.title = 'Set timer';
+      tmrBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5V8l2.5 2"/></svg>`;
+
+      // Subtask expand button (+ icon, rotates to × when open)
+      const expandBtn = document.createElement('button');
+      expandBtn.className = 'subtask-expand-btn' + (task.subtasksOpen ? ' open' : '');
+      expandBtn.setAttribute('aria-label', 'Toggle sub-tasks');
+      expandBtn.title = 'Sub-tasks';
+      expandBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="1" x2="6" y2="11"/><line x1="1" y1="6" x2="11" y2="6"/></svg>`;
+
+      // Delete
+      const del = document.createElement('button');
+      del.className = 'task-delete';
+      del.setAttribute('aria-label', 'Delete task');
+      del.title = 'Delete';
+      del.innerHTML = '&times;';
+
+      row.appendChild(chk);
+      row.appendChild(main);
+      row.appendChild(tmrDisplay);
+      row.appendChild(tmrBtn);
+      row.appendChild(expandBtn);
+      row.appendChild(del);
+      li.appendChild(row);
+
+      // ── Subtask section ──────────────────────────────────────
+      li.appendChild(buildSubtaskSection(task));
+
       return li;
+    }
+
+    function buildSubtaskSection(task) {
+      const section = document.createElement('div');
+      section.className = 'subtask-section' + (task.subtasksOpen ? ' open' : '');
+
+      // Add-subtask row
+      const addRow = document.createElement('div');
+      addRow.className = 'subtask-add-row';
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.className = 'subtask-input';
+      inp.placeholder = 'Add sub-task…';
+      inp.maxLength = 200;
+      const addSubBtn = document.createElement('button');
+      addSubBtn.className = 'subtask-add-btn';
+      addSubBtn.setAttribute('aria-label', 'Add sub-task');
+      addSubBtn.innerHTML = `<svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="1" x2="5" y2="9"/><line x1="1" y1="5" x2="9" y2="5"/></svg>`;
+      addRow.appendChild(inp);
+      addRow.appendChild(addSubBtn);
+      section.appendChild(addRow);
+
+      (task.subtasks || []).forEach(sub => section.appendChild(buildSubtaskItem(sub)));
+      return section;
+    }
+
+    function buildSubtaskItem(sub) {
+      const div = document.createElement('div');
+      div.className = 'subtask-item' + (sub.done ? ' done' : '');
+      div.dataset.subId = sub.id;
+
+      const chk = document.createElement('div');
+      chk.className = 'subtask-checkbox' + (sub.done ? ' checked' : '');
+
+      const txt = document.createElement('span');
+      txt.className = 'subtask-text';
+      txt.textContent = sub.text;
+
+      const del = document.createElement('button');
+      del.className = 'subtask-delete';
+      del.setAttribute('aria-label', 'Delete sub-task');
+      del.innerHTML = '&times;';
+
+      div.appendChild(chk);
+      div.appendChild(txt);
+      div.appendChild(del);
+      return div;
     }
 
     // ─── Sound engine ────────────────────────────────────────────
@@ -1891,6 +2146,79 @@
       }
     }
 
+    // ─── Sub-task mutations ───────────────────────────────────────
+    function toggleSubtaskSection(parentId) {
+      const task = state.tasks.find(t => t.id === parentId);
+      if (!task) return;
+      task.subtasksOpen = !task.subtasksOpen;
+      saveState();
+      // Toggle DOM directly — no full re-render needed
+      const li = taskList.querySelector(`[data-id="${parentId}"]`);
+      if (!li) return;
+      li.querySelector('.subtask-section')?.classList.toggle('open', task.subtasksOpen);
+      li.querySelector('.subtask-expand-btn')?.classList.toggle('open', task.subtasksOpen);
+    }
+
+    function addSubtask(parentId, text) {
+      if (!text) return;
+      const task = state.tasks.find(t => t.id === parentId);
+      if (!task) return;
+      if (!task.subtasks) task.subtasks = [];
+      task.subtasks.push({ id: uid(), text, done: false });
+      task.subtasksOpen = true;
+      saveState();
+      render();
+      playSound('add');
+      // Re-focus input after render rebuilds the DOM
+      const li = taskList.querySelector(`[data-id="${parentId}"]`);
+      li?.querySelector('.subtask-input')?.focus();
+    }
+
+    function toggleSubtask(parentId, subId) {
+      const task = state.tasks.find(t => t.id === parentId);
+      if (!task?.subtasks) return;
+      const sub = task.subtasks.find(s => s.id === subId);
+      if (!sub) return;
+      sub.done = !sub.done;
+      const checking = sub.done;
+
+      // Auto-complete parent when all subtasks are done
+      const allDone = task.subtasks.length > 0 && task.subtasks.every(s => s.done);
+      if (allDone && !task.done) {
+        task.done = true;
+        delete task.timerEnd;
+        delete task.timerFired;
+        state.archive = state.archive.filter(a => a.id !== parentId);
+        state.archive.unshift({ id: parentId, text: task.text, completedAt: Date.now() });
+      } else if (!allDone && task.done) {
+        // Un-complete parent if a subtask is unchecked
+        task.done = false;
+        state.archive = state.archive.filter(a => a.id !== parentId);
+      }
+
+      saveState();
+      render();
+      playSound(checking ? 'complete' : 'uncheck');
+
+      if (allDone && task.done) {
+        const li  = taskList.querySelector(`[data-id="${parentId}"]`);
+        const chk = li?.querySelector('.task-checkbox');
+        if (chk) {
+          chk.classList.remove('pop'); void chk.offsetWidth; chk.classList.add('pop');
+          chk.addEventListener('animationend', () => chk.classList.remove('pop'), { once: true });
+        }
+      }
+    }
+
+    function deleteSubtask(parentId, subId) {
+      const task = state.tasks.find(t => t.id === parentId);
+      if (!task?.subtasks) return;
+      task.subtasks = task.subtasks.filter(s => s.id !== subId);
+      saveState();
+      render();
+      playSound('delete');
+    }
+
     // ─── Event handlers ──────────────────────────────────────────
     addBtn.addEventListener('click', addTask);
 
@@ -1907,17 +2235,41 @@
       const li = e.target.closest('.task-item');
       if (!li) return;
       const id = li.dataset.id;
+
       if (e.target.closest('.task-checkbox')) {
         toggleTask(id);
       } else if (e.target.closest('.task-delete')) {
         deleteTask(id);
       } else if (e.target.closest('.timer-btn')) {
         openTimerSheet(id);
+      } else if (e.target.closest('.subtask-expand-btn')) {
+        toggleSubtaskSection(id);
+      } else if (e.target.closest('.subtask-add-btn')) {
+        const inp = li.querySelector('.subtask-input');
+        const text = inp?.value.trim();
+        if (text) { addSubtask(id, text); }
+        else inp?.focus();
+      } else if (e.target.closest('.subtask-checkbox')) {
+        const item = e.target.closest('.subtask-item');
+        if (item) toggleSubtask(id, item.dataset.subId);
+      } else if (e.target.closest('.subtask-delete')) {
+        const item = e.target.closest('.subtask-item');
+        if (item) deleteSubtask(id, item.dataset.subId);
       }
     });
 
-    // Keyboard support for checkboxes
+    // Keyboard support for checkboxes and subtask inputs
     taskList.addEventListener('keydown', e => {
+      // Enter in subtask input adds the subtask
+      if (e.key === 'Enter') {
+        const inp = e.target.closest('.subtask-input');
+        if (inp) {
+          const li = inp.closest('.task-item');
+          const text = inp.value.trim();
+          if (li && text) addSubtask(li.dataset.id, text);
+          return;
+        }
+      }
       if (e.key !== 'Enter' && e.key !== ' ') return;
       const chk = e.target.closest('.task-checkbox');
       if (!chk) return;
