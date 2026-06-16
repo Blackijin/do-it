@@ -1579,6 +1579,127 @@
     .settings-install-btn.visible { display: flex; }
     .settings-install-btn:hover { background: var(--accent-hover); }
     .settings-install-btn svg { width: 14px; height: 14px; }
+
+    /* ═══════════════════════════════════════════════════════════
+       DESKTOP OPTIMISATIONS
+       All rules below are gated to min-width:768px / pointer:fine
+       Mobile layout is completely unchanged.
+    ═══════════════════════════════════════════════════════════ */
+
+    /* 1 — Custom thin scrollbar */
+    * { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    /* 2 — Wider max-width */
+    @media (min-width: 768px) {
+      body { padding: 2rem 2rem 3rem; }
+      .app-wrapper { max-width: 960px; }
+    }
+    @media (min-width: 1100px) {
+      .app-wrapper { max-width: 1140px; }
+    }
+
+    /* 3 — Two-column layout */
+    .col-tasks, .col-sidebar { min-width: 0; }
+    @media (min-width: 1024px) {
+      .desktop-columns {
+        display: grid;
+        grid-template-columns: 1fr 360px;
+        gap: 1.5rem;
+        align-items: start;
+      }
+      .col-sidebar {
+        position: sticky;
+        top: 1.5rem;
+        max-height: calc(100vh - 3rem);
+        overflow-y: auto;
+        padding-bottom: 1rem;
+        border-radius: var(--radius);
+      }
+      /* Sidebar archive/weekly: full-width buttons */
+      .col-sidebar .archive-toggle-btn,
+      .col-sidebar .weekly-toggle-btn {
+        width: 100%;
+        justify-content: flex-start;
+        border-radius: var(--radius-sm);
+        margin-left: 0;
+        margin-right: 0;
+      }
+      .col-sidebar .archive-count-pill,
+      .col-sidebar .weekly-count-pill { margin-left: auto; }
+    }
+
+    /* 4 — Centered modal sheets (pointer:fine devices) */
+    @media (pointer: fine) {
+      .timer-backdrop,
+      .weekly-backdrop,
+      .settings-backdrop { background: rgba(0,0,0,.35); }
+
+      .timer-sheet,
+      .weekly-sheet,
+      .settings-sheet {
+        top: 50%;
+        left: 50%;
+        right: auto;
+        bottom: auto;
+        width: calc(100% - 3rem);
+        max-width: 460px;
+        border-radius: 16px;
+        border-top: none;
+        border: 1.5px solid var(--border);
+        padding: 6px 24px 24px;
+        box-shadow: 0 16px 48px rgba(0,0,0,.18);
+        transform: translate(-50%, -47%) scale(.97);
+        opacity: 0;
+        transition: transform .22s cubic-bezier(.4,0,.2,1), opacity .18s ease;
+      }
+      .timer-sheet.open,
+      .weekly-sheet.open,
+      .settings-sheet.open {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+      }
+      /* Drag handles are irrelevant on desktop */
+      .timer-sheet-handle,
+      .weekly-sheet-handle,
+      .settings-handle { display: none; }
+      /* Settings sheet max-height on desktop */
+      .settings-sheet { max-height: 85vh; overflow-y: auto; }
+    }
+
+    /* 5 — Hover & cursor polish */
+    @media (pointer: fine) {
+      /* Faint resting state so users discover the buttons */
+      .task-delete       { opacity: 0.25; }
+      .timer-btn         { opacity: 0.25; }
+      .subtask-expand-btn { opacity: 0.25; }
+      /* Full opacity on row hover (existing rules already handle this) */
+      .subtask-expand-btn.open { opacity: 1; }
+      .timer-btn.active        { opacity: 1; }
+    }
+
+    /* 6 — ↵ to add hint */
+    .input-hint {
+      display: none;
+      position: absolute;
+      right: calc(72px + .6rem + 10px);
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 11px;
+      color: var(--text-muted);
+      pointer-events: none;
+      white-space: nowrap;
+      font-weight: 500;
+    }
+    @media (pointer: fine) {
+      .add-task-section { position: relative; }
+      .input-hint { display: block; }
+      /* Hide hint while user is typing (handled via JS class) */
+      .add-task-section.has-text .input-hint { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -1608,6 +1729,12 @@
     </header>
 
 
+    <!-- DESKTOP TWO-COLUMN WRAPPER -->
+    <div class="desktop-columns">
+
+    <!-- LEFT: Tasks -->
+    <div class="col-tasks">
+
     <!-- ADD TASK -->
     <div class="add-task-section">
       <input
@@ -1619,6 +1746,7 @@
         aria-label="New task"
       />
       <button id="addBtn" class="add-btn" aria-label="Add task">+ Add</button>
+      <span class="input-hint" aria-hidden="true">↵ to add</span>
     </div>
 
     <!-- TASK LIST -->
@@ -1635,6 +1763,11 @@
         <p class="hint">Add a task above to get started.</p>
       </div>
     </div>
+
+    </div><!-- /col-tasks -->
+
+    <!-- RIGHT: Sidebar (Archive + Weekly) -->
+    <div class="col-sidebar">
 
     <!-- ARCHIVE TOGGLE BUTTON -->
     <button class="archive-toggle-btn" id="archiveToggleBtn" aria-expanded="false">
@@ -1688,7 +1821,10 @@
       </button>
     </div>
 
-  </div>
+    </div><!-- /col-sidebar -->
+    </div><!-- /desktop-columns -->
+
+  </div><!-- /app-wrapper -->
 
   <!-- Weekly task sheet -->
   <div class="weekly-backdrop" id="weeklyBackdrop"></div>
@@ -2983,6 +3119,27 @@
         Notification.requestPermission().then(p => { if (p === 'granted') scheduleAlarms(); });
       } else {
         scheduleAlarms();
+      }
+
+      // ── Desktop enhancements ──────────────────────────────────
+      const isDesktop = window.matchMedia('(pointer: fine)').matches;
+      if (isDesktop) {
+        // Auto-focus task input so keyboard users can type immediately
+        taskInput.focus();
+
+        // Show/hide the ↵ hint based on whether the input has text
+        const addSection = taskInput.closest('.add-task-section');
+        taskInput.addEventListener('input', () => {
+          addSection.classList.toggle('has-text', taskInput.value.length > 0);
+        });
+
+        // Escape closes whichever sheet is currently open
+        document.addEventListener('keydown', e => {
+          if (e.key !== 'Escape') return;
+          if (timerBackdrop.classList.contains('open'))   closeTimerSheet();
+          if (weeklyBackdrop.classList.contains('open'))  closeWeeklySheet();
+          if (settingsBackdrop.classList.contains('open')) closeSettings();
+        });
       }
     });
 
