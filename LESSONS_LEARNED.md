@@ -104,6 +104,42 @@ The `py` launcher (`py server.py`, `py -m pip install ...`) always resolves corr
 
 ---
 
+## Desktop / Responsive Optimisation
+
+**Gate every desktop rule behind `@media (min-width: …)` or `@media (pointer: fine)` — never assume screen size equals input type.**
+A wide monitor can still be touch-only (Surface). `pointer: fine` targets mouse/trackpad; `pointer: coarse` targets touch. Use both independently.
+
+**Bottom sheets feel wrong with a mouse — use centered dialogs on desktop.**
+Override `position: fixed; bottom: 0; left: 0; right: 0; transform: translateY(100%)` with:
+```css
+@media (pointer: fine) {
+  .sheet {
+    top: 50%; left: 50%; right: auto; bottom: auto;
+    max-width: 460px; width: calc(100% - 3rem);
+    border-radius: 16px; border: 1.5px solid var(--border); border-top: none;
+    transform: translate(-50%, -47%) scale(.97); opacity: 0;
+    transition: transform .22s cubic-bezier(.4,0,.2,1), opacity .18s;
+  }
+  .sheet.open { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+```
+The `.open` JS toggling logic is unchanged — only the visual differs.
+
+**Two-column layouts need `align-items: start` or the shorter column stretches.**
+`display: grid; grid-template-columns: 1fr 360px; align-items: start` keeps the sidebar its natural height. Without `align-items: start` both columns match the tallest one.
+
+**Sticky sidebars need `max-height + overflow-y: auto` or they overflow the viewport.**
+`position: sticky; top: 1.5rem; max-height: calc(100vh - 3rem); overflow-y: auto` lets the sidebar scroll independently if its content is taller than the screen.
+
+**`opacity: 0` buttons are invisible on desktop too — use a faint resting state.**
+Hover-reveal buttons (`opacity: 0` → `opacity: 1` on `:hover`) are the right default for mobile (always show via `pointer: coarse`) but on desktop a resting `opacity: 0.25` is better UX — users can see the affordance without the UI feeling cluttered. Override in `@media (pointer: fine)`.
+
+**Auto-focus inputs on desktop, never on mobile.**
+`taskInput.focus()` on mobile scrolls the page and opens the software keyboard unexpectedly.
+Gate it: `if (window.matchMedia('(pointer: fine)').matches) input.focus();`
+
+---
+
 ## Recurring / Weekly Features
 
 **Match JS class names exactly to CSS — mismatches are silent rendering failures.**
